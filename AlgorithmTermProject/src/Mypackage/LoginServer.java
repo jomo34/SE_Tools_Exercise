@@ -35,7 +35,7 @@ public class LoginServer
    {
       System.out.println("The Gachon SW server is running...");
       for(int i = 0; i < time1.length; i++) 
-			Arrays.fill(time1[i], "999");
+			Arrays.fill(time1[i], "99999");
       ExecutorService pool = Executors.newFixedThreadPool(500);
       try (ServerSocket listener = new ServerSocket(59001)) 
       {
@@ -49,20 +49,18 @@ public class LoginServer
 		// 끝나는 시간을 기준으로 정렬
 	   countT1=0;
 	 
-	 
-	   Arrays.sort(time1, new Comparator<String[]>() {
-				
-	            @Override
-	            public int compare(String[] o1, String[] o2) {
-	            	if(Integer.parseInt(o1[1])==Integer.parseInt(o1[1]))
-	                      return Integer.parseInt(o1[0])-Integer.parseInt(o1[0]);
-	                else
-	                      return Integer.parseInt(o1[1])-Integer.parseInt(o1[1]);
-	            }			
-		 });
-	   
+	   Arrays.sort(time1, new Comparator<String[]>() {      
+           @Override  
+          public int compare(String[] o1, String[] o2) {
+                  if( Integer.parseInt(o1[1])>Integer.parseInt(o2[1]))
+                        return 1;
+                    else
+                        return -1;
+          }
+           
+           
+	   	});
 	  
-	
 		int prev_end_time = 0;
 	
 		for(int i = 0; i < N; i++) {
@@ -260,7 +258,7 @@ public class LoginServer
 			
 			int a=0;
 
-			if(Integer.parseInt(scheduler[0])==18 && schedulecount==0) // 6시 되면 한번만 짜준다. 
+			if(Integer.parseInt(scheduler[0])==15 && schedulecount==0 && Integer.parseInt(scheduler[1])==37) // 6시 되면 한번만 짜준다. 
 			{
 				activity(time1,N);
 					for(int i=0;i<countT1;i++) {
