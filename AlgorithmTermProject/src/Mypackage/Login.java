@@ -28,7 +28,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
-import termProject.Login.info;
+
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -335,9 +335,9 @@ public class Login {
 					"Reservations will be completed if your reservation isn't overlapped with others.");
 			passLabel32.setBounds(5, 150, 500, 25);
 			panel.add(passLabel32);
-			JLabel passLabel33 = new JLabel("At 18:00, the server will send you whether it is booked or not.");
-			passLabel33.setBounds(5, 170, 500, 25);
-			panel.add(passLabel33);
+			JLabel passLabel33 = new JLabel("At 18:00, the server will show the reservation table for the next day.");
+	        passLabel33.setBounds(5, 170, 500, 25);
+	        panel.add(passLabel33);
 			JLabel passLabel34 = new JLabel("Good luck, students.");
 			passLabel34.setBounds(5, 190, 500, 25);
 			panel.add(passLabel34);
