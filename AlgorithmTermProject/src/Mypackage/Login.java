@@ -25,9 +25,10 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumnModel;
 
-
-import Mypackage.Login.info;
+import termProject.Login.info;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -47,6 +48,8 @@ public class Login {
 	Scanner in; // 소켓을 받아들일 매개체
 	PrintWriter out; // 소켓으로 보낼 매게체
 	String curid; // 현재 로그인 id
+	static String res="";
+	static int count;
 
 	// login gui variables
 	JFrame frame = new JFrame("login form"); // 처음 로그인창
@@ -62,7 +65,7 @@ public class Login {
 	String curname;
 	String logpw;
 	String logid;
-
+	int buttoncount=0;
 	// TODO:
 
 	// 비밀번호 암호화 코드
@@ -85,8 +88,7 @@ public class Login {
 	}
 
 	// constructor
-	public Login(String serverAddress) 
-	{
+	public Login(String serverAddress) {
 		this.serverAddress = serverAddress;
 		// FlowLayout사용
 		frame.setLayout(new FlowLayout());
@@ -284,12 +286,11 @@ public class Login {
 			// TODO 자동 생성된 생성자 스텁
 
 			sub.setTitle("Main");
-			sub.setSize(280, 300);
+			sub.setSize(500, 350);
 			sub.setResizable(false);
 			sub.setLocation(800, 450);
 			sub.setLocationRelativeTo(null);
 			sub.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			
 
 			// panel
 			JPanel panel = new JPanel();
@@ -307,46 +308,72 @@ public class Login {
 		public void placeLoginPanel(JPanel panel) {
 			panel.setLayout(null);
 			JLabel userLabel = new JLabel("Welcome to Gachon Festival!");
-			userLabel.setBounds(33, 10, 200, 25);
-			userLabel.setFont(new Font("Serif", Font.BOLD, 15));
+			userLabel.setBounds(90, 10, 500, 25);
+			userLabel.setFont(new Font("Serif", Font.BOLD, 25));
 			panel.add(userLabel);
 
-			JLabel passLabel = new JLabel("At the 2021 Gachon Festival, AI·software");
-			passLabel.setBounds(15, 40, 250, 25);
+			JLabel passLabel = new JLabel(
+					"At the 2021 Gachon Festival, AI·software department will hold a special event in");
+			passLabel.setBounds(5, 50, 500, 25);
 			panel.add(passLabel);
-			JLabel passLabel2 = new JLabel("department will hold a special event");
-			passLabel2.setBounds(25, 65, 250, 25);
+			JLabel passLabel2 = new JLabel("department's room.");
+			passLabel2.setBounds(5, 70, 500, 25);
 			panel.add(passLabel2);
-			JLabel passLabel3 = new JLabel("in department's room");
-			passLabel3.setBounds(65, 90, 250, 25);
+			JLabel passLabel21 = new JLabel(
+					"You can make a reservation for tomorrow's schedule from 0 o'clock to 18 o'clock.");
+			passLabel21.setBounds(5, 90, 500, 25);
+			panel.add(passLabel21);
+			JLabel passLabel3 = new JLabel(
+					"However, our student council used a slightly unusual algorithm for reservations.");
+			passLabel3.setBounds(5, 110, 500, 25);
 			panel.add(passLabel3);
-			JLabel passLabel4 = new JLabel("Click the \"My Info\"");
-			passLabel4.setBounds(5, 150, 120, 25);
+			JLabel passLabel31 = new JLabel(
+					"Reservation method is not a first-come, first-served, but based on a greed algorithm.");
+			passLabel31.setBounds(5, 130, 500, 25);
+			panel.add(passLabel31);
+			JLabel passLabel32 = new JLabel(
+					"Reservations will be completed if your reservation isn't overlapped with others.");
+			passLabel32.setBounds(5, 150, 500, 25);
+			panel.add(passLabel32);
+			JLabel passLabel33 = new JLabel("At 18:00, the server will send you whether it is booked or not.");
+			passLabel33.setBounds(5, 170, 500, 25);
+			panel.add(passLabel33);
+			JLabel passLabel34 = new JLabel("Good luck, students.");
+			passLabel34.setBounds(5, 190, 500, 25);
+			panel.add(passLabel34);
+
+			JLabel passLabel4 = new JLabel("Click the button");
+			passLabel4.setBounds(10, 230, 120, 25);
 			panel.add(passLabel4);
 			JLabel passLabel5 = new JLabel("to check your info");
-			passLabel5.setBounds(5, 180, 120, 25);
+			passLabel5.setBounds(5, 250, 120, 25);
 			panel.add(passLabel5);
-			JLabel passLabel6 = new JLabel("Click the \"Book\"");
-			passLabel6.setBounds(155, 150, 120, 25);
+			JLabel passLabel6 = new JLabel("Click the button");
+			passLabel6.setBounds(195, 230, 120, 25);
 			panel.add(passLabel6);
 			JLabel passLabel7 = new JLabel("to book the room");
-			passLabel7.setBounds(150, 180, 120, 25);
+			passLabel7.setBounds(190, 250, 120, 25);
 			panel.add(passLabel7);
-			
+			JLabel passLabel8 = new JLabel("Click the button");
+			passLabel8.setBounds(380, 230, 120, 25);
+			panel.add(passLabel8);
+			JLabel passLabel9 = new JLabel("to check schedule");
+			passLabel9.setBounds(375, 250, 120, 25);
+			panel.add(passLabel9);
 
 			JButton b1 = new JButton("My Info");
-			b1.setBounds(5, 220, 100, 25);
+			b1.setBounds(5, 280, 100, 25);
 			panel.add(b1);
 			b1.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					new info();
-					
+
 				}
 			});
 
 			JButton b2 = new JButton("Book");
-			b2.setBounds(155, 220, 100, 25);
+			b2.setBounds(190, 280, 100, 25);
 			panel.add(b2);
 			b2.addActionListener(new ActionListener() {
 				@Override
@@ -354,20 +381,27 @@ public class Login {
 					new Timer();
 				}
 			});
+
+			JButton b3 = new JButton("Time table");
+			b3.setBounds(375, 280, 100, 25);
+			panel.add(b3);
+			b3.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+						new Timetable();
+					
+				}
+			});
 		}
 	}
-	
-	
+
 	public class info extends JFrame { // 사용자의 정보 & 변경
 		JButton b1 = new JButton("Modify");
 		JButton b2 = new JButton("Exit");
 		String studentnum, email, name, grade;
-		//서버로부터 정보를 받아서 각각에 넣어줌
+		// 서버로부터 정보를 받아서 각각에 넣어줌
 
-		
-		
-		
-		
 		public info() {
 			// TODO 자동 생성된 생성자 스텁
 
@@ -391,10 +425,9 @@ public class Login {
 
 		public void placeinfoPanel(JPanel panel) {
 			panel.setLayout(null);
-			JLabel userLabel = new JLabel("Information about \"" +curid +"\"");
+			JLabel userLabel = new JLabel("Information about \"" + curid + "\"");
 			userLabel.setBounds(15, 10, 200, 30);
 			panel.add(userLabel);
-			
 
 			JLabel passLabel = new JLabel("User ID");
 			passLabel.setBounds(15, 40, 200, 30);
@@ -402,68 +435,65 @@ public class Login {
 			JTextField idtext = new JTextField(20);
 			idtext.setText(curid);
 			idtext.setEditable(false);
-	        idtext.setBounds(100, 40, 100, 30); 
-	        panel.add(idtext);
-	        
+			idtext.setBounds(100, 40, 100, 30);
+			panel.add(idtext);
+
 			JLabel passLabel2 = new JLabel("Stu_num");
 			passLabel2.setBounds(15, 70, 200, 30);
 			panel.add(passLabel2);
 			JTextField stunum = new JTextField(20);
-			stunum.setText(""+curnumber);
+			stunum.setText("" + curnumber);
 			stunum.setEditable(false);
-	        stunum.setBounds(100, 70, 100, 30); 
-	        panel.add(stunum);
-			
+			stunum.setBounds(100, 70, 100, 30);
+			panel.add(stunum);
+
 			JLabel passLabel3 = new JLabel("Email");
 			passLabel3.setBounds(15, 100, 200, 30);
 			panel.add(passLabel3);
 			JTextField emailtext = new JTextField(20);
 			emailtext.setText(curemail);
-	        emailtext.setBounds(100, 100, 100, 30); 
-	        panel.add(emailtext);
-	        
+			emailtext.setBounds(100, 100, 100, 30);
+			panel.add(emailtext);
+
 			JLabel passLabel4 = new JLabel("Name");
 			passLabel4.setBounds(15, 130, 200, 30);
 			panel.add(passLabel4);
 			JTextField nametext = new JTextField(20);
 			nametext.setText(curname);
 			nametext.setEditable(false);
-	        nametext.setBounds(100, 130, 100, 30); 
-	        panel.add(nametext);
-	        
+			nametext.setBounds(100, 130, 100, 30);
+			panel.add(nametext);
+
 			JLabel passLabel5 = new JLabel("Grade");
 			passLabel5.setBounds(15, 160, 200, 30);
 			panel.add(passLabel5);
 			JTextField gratext = new JTextField(20);
-			gratext.setText(""+curgrade);
-			gratext.setBounds(100, 160, 100, 30); 
-	        panel.add(gratext);
-			
+			gratext.setText("" + curgrade);
+			gratext.setBounds(100, 160, 100, 30);
+			panel.add(gratext);
 
-	        //modify 버튼 눌렀을때 값 수정해주고 서버에 보내주기
+			// modify 버튼 눌렀을때 값 수정해주고 서버에 보내주기
 			b1.setBounds(5, 220, 100, 25);
 			panel.add(b1);
 			b1.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					//String mod_num = stunum.getText();
-					//studentnum = mod_num;
-					//stunum.setText(studentnum);
+					// String mod_num = stunum.getText();
+					// studentnum = mod_num;
+					// stunum.setText(studentnum);
 					String mod_email = emailtext.getText();
 					email = mod_email;
 					emailtext.setText(email);
-					//String mod_name = nametext.getText();
-					//name = mod_name;
-					//nametext.setText(name);
+					// String mod_name = nametext.getText();
+					// name = mod_name;
+					// nametext.setText(name);
 					String mod_grade = gratext.getText();
 					grade = mod_grade;
-					gratext.setText(grade);					
-					//System.out.println(studentnum + email + name + grade);
-					//서버 전달
-					out.println("Update"+":"+curid+":"+email+":"+grade); // 서버로 전달 
-					
-					
-					
+					gratext.setText(grade);
+					// System.out.println(studentnum + email + name + grade);
+					// 서버 전달
+					out.println("Update" + ":" + curid + ":" + email + ":" + grade); // 서버로 전달
+
 				}
 			});
 
@@ -477,96 +507,161 @@ public class Login {
 			});
 		}
 	}
-		public class Timer extends JFrame implements Runnable
-		{
 
-			JLabel label;
+	public class Timer extends JFrame implements Runnable {
+
+		JLabel label;
+		JButton b1 = new JButton("Book");
+		JButton b2 = new JButton("Exit");
+		JLabel l1, l2, l3;
+		JTextField text = new JTextField();
+		String bookTime;
+
+		public Timer() {
+			setSize(350, 300);
+			setLocationRelativeTo(null);
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			String time = getCurrentTime();
+			getContentPane().setLayout(null);
+			label = new JLabel(time);
+			label.setFont(new Font("TimesRoman", Font.ITALIC, 20));
+			label.setHorizontalAlignment(JLabel.CENTER);
+			label.setBounds(115, 5, 100, 50);
+			add(label);
+
+			l1 = new JLabel("Enter the reservation time");
+			l1.setBounds(20, 50, 300, 20);
+			l2 = new JLabel("Plz enter start time + space + end time");
+			l2.setBounds(20, 80, 300, 20);
+			l3 = new JLabel("Ex) 1320 1400");
+			l3.setBounds(20, 110, 300, 20);
+			add(l1);
+			add(l2);
+			add(l3);
+			text.setBounds(120, 150, 100, 20);
+			add(text);
+
 			JButton b1 = new JButton("Book");
+			b1.setBounds(5, 200, 100, 30);
+			add(b1);
+			b1.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					bookTime = text.getText();
+					b1.setEnabled(false);
+					// 서버에 bookTime 보내주기
+					out.println("Book " + bookTime + " " + curid);
+					JOptionPane.showMessageDialog(null, "You entered " + bookTime, "Check the reservation",
+							JOptionPane.DEFAULT_OPTION);
+					dispose();
+
+				}
+			});
 			JButton b2 = new JButton("Exit");
-			JLabel l1, l2, l3;
-		    JTextField text = new JTextField();
-		    String bookTime;
-			public Timer() 
-			{
-				setSize(350, 300);
-				setLocationRelativeTo(null);
-				setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-				String time = getCurrentTime();
-				getContentPane().setLayout(null);
-				label = new JLabel(time);
-				label.setFont(new Font("TimesRoman", Font.ITALIC, 20));
-				label.setHorizontalAlignment(JLabel.CENTER);
-				label.setBounds(115, 5, 100, 50);
-				add(label);
-				
-				l1 = new JLabel("Enter the reservation time");
-				l1.setBounds(20, 50, 300, 20);
-				l2 = new JLabel("Plz enter start time + space + end time");
-				l2.setBounds(20, 80, 300, 20);
-				l3 = new JLabel("Ex) 1320 1400");
-				l3.setBounds(20, 110, 300, 20);
-				add(l1);
-				add(l2);
-				add(l3);
-				text.setBounds(120,150,100,20);
-				add(text);
-				
-				JButton b1 = new JButton("Book");
-				b1.setBounds(5, 200, 100, 30);
-				add(b1);
-				b1.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						bookTime = text.getText();
-						b1.setEnabled(false);
-						// 서버에 bookTime 보내주기
-						out.println("Book "+bookTime+" "+curid);	
-						JOptionPane.showMessageDialog(null, "You entered "+bookTime , "Check the reservation", JOptionPane.DEFAULT_OPTION);
-						dispose();
-						
-					}
-				});
-				JButton b2 = new JButton("Exit");
-				b2.setBounds(230, 200, 100, 30);
-				add(b2);
-				b2.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				});
-				Thread t1 = new Thread(this);
-				t1.start();
-				
-				setVisible(true);
-			}
-			
-			@Override
-			public void run() {
-				while(true) {
-					try {
-						Thread.sleep(1000);
-						String time = getCurrentTime();
-						label.setText(time);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+			b2.setBounds(230, 200, 100, 30);
+			add(b2);
+			b2.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
+			Thread t1 = new Thread(this);
+			t1.start();
+
+			setVisible(true);
+		}
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(1000);
+					String time = getCurrentTime();
+					label.setText(time);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
-			public String getCurrentTime() 
-			{
-				Calendar c = Calendar.getInstance();
-				int hour = c.get(Calendar.HOUR_OF_DAY);
-				int min = c.get(Calendar.MINUTE);
-				int sec = c.get(Calendar.SECOND);
-				
-				String time = hour+":"+min+":"+sec;
-				return time;
-			}
-		
+		}
+
+		public String getCurrentTime() {
+			Calendar c = Calendar.getInstance();
+			int hour = c.get(Calendar.HOUR_OF_DAY);
+			int min = c.get(Calendar.MINUTE);
+			int sec = c.get(Calendar.SECOND);
+
+			String time = hour + ":" + min + ":" + sec;
+			return time;
+		}
+
 	}
+	public class Timetable extends JFrame {
+		String bookperson[] = { "-", "-", "-", "-", "-", "-", "-", "-" };
+		String header[] = { "-", "-", "-", "-", "-", "-", "-", "-" };;
+		String contents[][] = new String[1][8];
+
+		String cont[]=new String[30];
+		
+		public Timetable() {		
+			cont= res.split(" ");
+			
+			for (int i = 0; i < 8; i++) {
+				contents[0][i] = bookperson[i];
+			}
+
+			setTitle("Time table");
+			setSize(600, 110);
+			setLocation(800, 450);
+			setLocationRelativeTo(null);
+
+			// panel
+			JTable table = new JTable(contents, header) {
+				public boolean isCellEditable(int i, int c) {
+					return false;
+				}
+			};
+			for(int i=0; i<8; i++) {
+				 table.getColumnModel().getColumn(i).setPreferredWidth(40);
+			}
+			DefaultTableCellRenderer renderer1 = (DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer();
+			renderer1.setHorizontalAlignment(SwingConstants.CENTER);
+			table.getTableHeader().setDefaultRenderer(renderer1);
+			table.getTableHeader().setReorderingAllowed(false);
+
+			DefaultTableCellRenderer renderer2 = new DefaultTableCellRenderer();
+			renderer2.setHorizontalAlignment(SwingConstants.CENTER);
+			TableColumnModel model = table.getColumnModel();
+			for (int i = 0; i < model.getColumnCount(); i++) {
+				model.getColumn(i).setCellRenderer(renderer2);
+			}
+			for (int i = 0; i < count; i++) {
+				bookperson[i]=cont[2+2*i];
+				header[i]=cont[1+2*i];
+			}
+			for(int i=0; i<count; i++) {
+                table.setValueAt(bookperson[i], 0, i);
+                table.getTableHeader().getColumnModel().getColumn(i).setHeaderValue(header[i]);
+
+   			    table.getTableHeader().repaint();
+     
+             }
+			
+
+			JScrollPane scrollpane = new JScrollPane(table);
+
+			// add
+			add(scrollpane);
+
+			// visible
+			setVisible(true);
+		}
+
+	}
+
 	
+
 	// TODO:
 	public void run() {
 		// TODO Auto-generated method stub
@@ -577,20 +672,21 @@ public class Login {
 			String[] userinfo = null; // 사용자 정보저장하는 변수
 			while (true) {
 				String line = in.nextLine();
+				System.out.println(line);
+				
 				if (line.contains("access")) // 로그인한 정보를 서버가 검사하고, 승인됫다는 메시지가 왔을 경우
 				{
 					userinfo = line.split(":");
-
 					JOptionPane.showMessageDialog(null, "로그인 성공", "로그인 확인!", JOptionPane.DEFAULT_OPTION);// 서버가 로그인
 					new main();
 					// 표출
 					// TODO:
 					curid = userinfo[1];
-					curnumber=Integer.parseInt(userinfo[2]);
-					curemail=userinfo[3];
-					curname=userinfo[4];
-					curgrade=Integer.parseInt(userinfo[5]);
-					
+					curnumber = Integer.parseInt(userinfo[2]);
+					curemail = userinfo[3];
+					curname = userinfo[4];
+					curgrade = Integer.parseInt(userinfo[5]);
+
 					// 현재로그인한 사용자 이름을 저장
 				}
 				// 아이디가 틀렸을 때
@@ -599,8 +695,7 @@ public class Login {
 																											// 시,
 																											// 창표출
 					return;
-				}
-
+				}			
 				// 비밀번호가 틀렸을 때
 				else if (line.contains("pw invalid")) {
 					JOptionPane.showMessageDialog(null, "비밀번호 틀림!", "로그인 확인!", JOptionPane.DEFAULT_OPTION); // 로그인
@@ -610,17 +705,21 @@ public class Login {
 				} else if (line.contains("Welcome")) // 회원가입에 성공했을 때
 				{
 					JOptionPane.showMessageDialog(null, "회원가입성공", "환영합니다!", JOptionPane.DEFAULT_OPTION); // 회원가입 성공
-																											// 시,																							// 창표출
-				} 
-				else if(line.contains("UC"))
-				{
+																											// 시, // 창표출
+				} else if (line.contains("UC")) {
 					JOptionPane.showMessageDialog(null, "수정 성공", "수정 성공!", JOptionPane.DEFAULT_OPTION);
-				}
-				else if(line.contains("UF"))
-				{
+				} else if (line.contains("UF")) {
 					JOptionPane.showMessageDialog(null, "수정 실패", "수정 실패!", JOptionPane.DEFAULT_OPTION);
+				} else if(line.contains("result")) {
+						res=line;
+						count=in.nextInt();
+				}
+				else if(line.contains("Late")) // 예약이 마감되었을 때, 
+				{
+					JOptionPane.showMessageDialog(null, "예약 마감", "오늘 예약은 마감되었습니다.", JOptionPane.DEFAULT_OPTION);
 				}
 				
+
 			}
 		} catch (Exception e) {
 			System.out.println(e);
@@ -628,6 +727,9 @@ public class Login {
 			frame.dispose();
 		}
 	}
+	
+
+
 	public static void server(String fileName) // input.txt파일에서 ip주소와 port number를 불러오는 함수.
 	{
 		Scanner inputStream = null;
@@ -646,7 +748,6 @@ public class Login {
 			portnum = inputStream.nextInt();
 		}
 	}
-	
 
 	public static void main(String args[]) {
 		String fname = "input.txt";
