@@ -157,6 +157,42 @@ public class Login {
     frame.add(paPanel, BorderLayout.WEST);
     frame.add(loginPanel);
 
+
+	ublic Login(String serverAddress) {
+		this.serverAddress = serverAddress;
+		// FlowLayout���
+		frame.setLayout(new FlowLayout());
+	
+		// Border�� ���� ����
+		EtchedBorder eborder = new EtchedBorder();
+		// ���̺� ����
+		lbl = new JLabel("Enter Id and Password");
+		// ���̺��� ���� �����
+		lbl.setBorder(eborder);
+		// ���̺� �߰�
+		frame.add(lbl);
+	
+		emptyPanel = new JPanel();
+		emp = new JLabel("\n");
+		emptyPanel.add(emp);
+		frame.add(emp);
+	
+		// id�гΰ� pw �гλ���
+		idPanel = new JPanel();
+		paPanel = new JPanel();
+	
+		la3 = new JLabel("User ID       ");
+		la2 = new JLabel("Password  ");
+		// id�ؽ�Ʈ�ʵ�� pw�ؽ�Ʈ �ʵ� ����
+		id = new JTextField(15);
+		passwd = new JPasswordField(15);
+		idPanel.add(la3);
+		idPanel.add(id);
+		idPanel.setBackground(Color.white);
+		paPanel.add(passwd);
+		paPanel.setBackground(Color.white);
+
+
     b1.addActionListener(
       new ActionListener() {
         public void actionPerformed(ActionEvent e) {
