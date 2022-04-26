@@ -42,17 +42,17 @@ import java.awt.Font;
 
 public class Login {
 	//
-	static String ip = null; // txtíŒŒì¼ì—ì„œ, ipì½ì–´ì˜´.
+	static String ip = null; // txtÆÄÀÏ¿¡¼­, ipÀĞ¾î¿È.
 	static int portnum = 0; // port number
-	String serverAddress; // ì„œë²„ ì£¼ì†Œ
-	Scanner in; // ì†Œì¼“ì„ ë°›ì•„ë“¤ì¼ ë§¤ê°œì²´
-	PrintWriter out; // ì†Œì¼“ìœ¼ë¡œ ë³´ë‚¼ ë§¤ê²Œì²´
-	String curid; // í˜„ì¬ ë¡œê·¸ì¸ id
+	String serverAddress; // ¼­¹ö ÁÖ¼Ò
+	Scanner in; // ¼ÒÄÏÀ» ¹Ş¾ÆµéÀÏ ¸Å°³Ã¼
+	PrintWriter out; // ¼ÒÄÏÀ¸·Î º¸³¾ ¸Å°ÔÃ¼
+	String curid; // ÇöÀç ·Î±×ÀÎ id
 	static String res="";
 	static int count;
 
 	// login gui variables
-	JFrame frame = new JFrame("login form"); // ì²˜ìŒ ë¡œê·¸ì¸ì°½
+	JFrame frame = new JFrame("login form"); // Ã³À½ ·Î±×ÀÎÃ¢
 	JLabel lbl, la1, la2, la3, emp;
 	JTextField id;
 	JPasswordField passwd;
@@ -68,7 +68,7 @@ public class Login {
 	int buttoncount=0;
 	// TODO:
 
-	// ë¹„ë°€ë²ˆí˜¸ ì•”í˜¸í™” ì½”ë“œ
+	// ºñ¹Ğ¹øÈ£ ¾ÏÈ£È­ ÄÚµå
 	public String encryptSHA256(String str) {
 		String sha = "";
 		try {
@@ -81,7 +81,7 @@ public class Login {
 			}
 			sha = sb.toString();
 		} catch (NoSuchAlgorithmException e) {
-			System.out.println("ì•”í˜¸í™” ì—ëŸ¬-NoSuchAlgorithmException");
+			System.out.println("¾ÏÈ£È­ ¿¡·¯-NoSuchAlgorithmException");
 			sha = null;
 		}
 		return sha;
@@ -90,16 +90,16 @@ public class Login {
 	// constructor
 	public Login(String serverAddress) {
 		this.serverAddress = serverAddress;
-		// FlowLayoutì‚¬ìš©
+		// FlowLayout»ç¿ë
 		frame.setLayout(new FlowLayout());
 
-		// Borderë¡œ ì˜ì—­ ìƒì„±
+		// Border·Î ¿µ¿ª »ı¼º
 		EtchedBorder eborder = new EtchedBorder();
-		// ë ˆì´ë¸” ìƒì„±
+		// ·¹ÀÌºí »ı¼º
 		lbl = new JLabel("Enter Id and Password");
-		// ë ˆì´ë¸”ì— ì˜ì—­ ë§Œë“¤ê¸°
+		// ·¹ÀÌºí¿¡ ¿µ¿ª ¸¸µé±â
 		lbl.setBorder(eborder);
-		// ë ˆì´ë¸” ì¶”ê°€
+		// ·¹ÀÌºí Ãß°¡
 		frame.add(lbl);
 
 		emptyPanel = new JPanel();
@@ -107,13 +107,13 @@ public class Login {
 		emptyPanel.add(emp);
 		frame.add(emp);
 
-		// idíŒ¨ë„ê³¼ pw íŒ¨ë„ìƒì„±
+		// idÆĞ³Î°ú pw ÆĞ³Î»ı¼º
 		idPanel = new JPanel();
 		paPanel = new JPanel();
 
 		la3 = new JLabel("User ID       ");
 		la2 = new JLabel("Password  ");
-		// idí…ìŠ¤íŠ¸í•„ë“œì™€ pwí…ìŠ¤íŠ¸ í•„ë“œ ì„ ì–¸
+		// idÅØ½ºÆ®ÇÊµå¿Í pwÅØ½ºÆ® ÇÊµå ¼±¾ğ
 		id = new JTextField(15);
 		passwd = new JPasswordField(15);
 		idPanel.add(la3);
@@ -123,7 +123,7 @@ public class Login {
 		paPanel.add(passwd);
 		paPanel.setBackground(Color.white);
 
-		// ë¡œê·¸ì¸ê³¼ íšŒì›ê°€ì…ì„ ìœ„í•œ íŒ¨ë„ ìƒì„±
+		// ·Î±×ÀÎ°ú È¸¿ø°¡ÀÔÀ» À§ÇÑ ÆĞ³Î »ı¼º
 
 		loginPanel = new JPanel();
 		loginPanel.setBackground(Color.white);
@@ -142,16 +142,16 @@ public class Login {
 		b1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String comment = e.getActionCommand();
-				if (comment.contentEquals("Login")) // ë¡œê·¸ì¸ ë²„íŠ¼ì„ ëˆŒë €ì„ ë•Œ,
+				if (comment.contentEquals("Login")) // ·Î±×ÀÎ ¹öÆ°À» ´­·¶À» ¶§,
 				{
 
-					logid = id.getText().trim(); // idì— ëˆ„ë¥¸ ê°’ì„ ë¶ˆëŸ¬ì˜´
-					logpw = passwd.getText(); // íŒ¨ìŠ¤ì›Œë“œì— ëˆ„ë¥¸ ê°’ì„ ë¶ˆëŸ¬ì˜´.
-					String encryptLogPW = encryptSHA256(logpw); // ì•”í˜¸í™”ëœ ë¹„ë°€ë²ˆí˜¸ë¥¼ í•´ë…í•´ì„œ ë°›ì•„ì˜´
-					out.println("logid" + logid + " " + encryptLogPW); // ì„œë²„ì—ê²Œ ì•„ì´ë””ì™€ íŒ¨ìŠ¤ì›Œë“œ ì „ë‹¬
-					if (logid.length() == 0 || logpw.length() == 0) // idì™€ ë¹„ë°€ë²ˆí˜¸ë¥¼ ì•„ë¬´ ê²ƒë„ ì…ë ¥í•˜ì§€ ì•Šì•˜ì„ ë•Œ, ì—ëŸ¬ ë©”ì‹œì§€ë¥¼ í‘œì¶œí•¨.
+					logid = id.getText().trim(); // id¿¡ ´©¸¥ °ªÀ» ºÒ·¯¿È
+					logpw = passwd.getText(); // ÆĞ½º¿öµå¿¡ ´©¸¥ °ªÀ» ºÒ·¯¿È.
+					String encryptLogPW = encryptSHA256(logpw); // ¾ÏÈ£È­µÈ ºñ¹Ğ¹øÈ£¸¦ ÇØµ¶ÇØ¼­ ¹Ş¾Æ¿È
+					out.println("logid" + logid + " " + encryptLogPW); // ¼­¹ö¿¡°Ô ¾ÆÀÌµğ¿Í ÆĞ½º¿öµå Àü´Ş
+					if (logid.length() == 0 || logpw.length() == 0) // id¿Í ºñ¹Ğ¹øÈ£¸¦ ¾Æ¹« °Íµµ ÀÔ·ÂÇÏÁö ¾Ê¾ÒÀ» ¶§, ¿¡·¯ ¸Ş½ÃÁö¸¦ Ç¥ÃâÇÔ.
 					{
-						JOptionPane.showMessageDialog(null, "ì•„ì´ë”” ë˜ëŠ” ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥ í•˜ì…”ì•¼ ë©ë‹ˆë‹¤.", "ì•„ì´ë””ë‚˜ ë¹„ë²ˆì„ ì…ë ¥!",
+						JOptionPane.showMessageDialog(null, "¾ÆÀÌµğ ¶Ç´Â ºñ¹Ğ¹øÈ£¸¦ ÀÔ·Â ÇÏ¼Å¾ß µË´Ï´Ù.", "¾ÆÀÌµğ³ª ºñ¹øÀ» ÀÔ·Â!",
 								JOptionPane.DEFAULT_OPTION);
 						return;
 					}
@@ -159,14 +159,14 @@ public class Login {
 				}
 			}
 		});
-		b2.addActionListener(new ActionListener() { // íšŒì›ê°€ì…ì„ ëˆŒë €ì„ ë•Œ, íšŒì›ê°€ì… ì°½ìœ¼ë¡œ ì´ë™ì‹œì¼œì¤€ë‹¤.
+		b2.addActionListener(new ActionListener() { // È¸¿ø°¡ÀÔÀ» ´­·¶À» ¶§, È¸¿ø°¡ÀÔ Ã¢À¸·Î ÀÌµ¿½ÃÄÑÁØ´Ù.
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				new Resister();
 			}
 		});
 
-		// 3í–‰ 20ì—´ ì˜ì—­ì˜ í…ìŠ¤íŠ¸ì—ì–´ë¦¬ì–´
+		// 3Çà 20¿­ ¿µ¿ªÀÇ ÅØ½ºÆ®¿¡¾î¸®¾î
 		// content = new JTextArea(3,20);
 		// JScrollPane s= new JScrollPane(content);
 		// add(s);
@@ -177,7 +177,7 @@ public class Login {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	public class Resister { // íšŒì›ê°€ì…ì„ í•  ë•Œì˜ ì°½
+	public class Resister { // È¸¿ø°¡ÀÔÀ» ÇÒ ¶§ÀÇ Ã¢
 
 		JFrame sub = new JFrame("Resister");
 		JLabel lbl, namelbl, gradelbl, emaillbl, idlbl, pwlbl, stnumlbl;
@@ -194,7 +194,7 @@ public class Login {
 			EtchedBorder eborder = new EtchedBorder();
 
 			lbl = new JLabel("Enter user information");
-			// ë ˆì´ë¸”ì— ì˜ì—­ ë§Œë“¤ê¸°
+			// ·¹ÀÌºí¿¡ ¿µ¿ª ¸¸µé±â
 			lbl.setBorder(eborder);
 			sub.add(lbl);
 
@@ -254,9 +254,9 @@ public class Login {
 			resister_btn.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					String comment = e.getActionCommand();
-					if (comment.contentEquals("Resister")) // registerë²„íŠ¼ ì…ë ¥ì‹œ,
+					if (comment.contentEquals("Resister")) // register¹öÆ° ÀÔ·Â½Ã,
 					{
-						String name = nameField.getText(); // ì´ë¦„, ìƒë…„ì›”ì¼ë“±ì„ ë¶ˆëŸ¬ì˜´
+						String name = nameField.getText(); // ÀÌ¸§, »ı³â¿ùÀÏµîÀ» ºÒ·¯¿È
 						String stnum = stnumField.getText();
 						String email = emailField.getText();
 						String id = idField.getText();
@@ -264,7 +264,7 @@ public class Login {
 						String encryptPW = encryptSHA256(pw);
 						String grade = gradeField.getText();
 						out.println("Resister" + name + " " + stnum + " " + email + " " + id + " " + encryptPW + " "
-								+ grade); // ì„œë²„ì—ê²Œ ì „ë‹¬.
+								+ grade); // ¼­¹ö¿¡°Ô Àü´Ş.
 					}
 					sub.dispose();
 				}
@@ -277,13 +277,13 @@ public class Login {
 		}
 	}
 
-	public class main { // ë¡œê·¸ì¸ ì„±ê³µì‹œ ë‚˜ì˜¤ëŠ” ì°½
+	public class main { // ·Î±×ÀÎ ¼º°ø½Ã ³ª¿À´Â Ã¢
 		JFrame sub = new JFrame("Main");
 		JButton b1 = new JButton("My Info");
 		JButton b2 = new JButton("Book");
 
 		public main() {
-			// TODO ìë™ ìƒì„±ëœ ìƒì„±ì ìŠ¤í…
+			// TODO ÀÚµ¿ »ı¼ºµÈ »ı¼ºÀÚ ½ºÅÓ
 
 			sub.setTitle("Main");
 			sub.setSize(500, 350);
@@ -313,7 +313,7 @@ public class Login {
 			panel.add(userLabel);
 
 			JLabel passLabel = new JLabel(
-					"At the 2021 Gachon Festival, AIÂ·software department will hold a special event in");
+					"At the 2021 Gachon Festival, AI¡¤software department will hold a special event in");
 			passLabel.setBounds(5, 50, 500, 25);
 			panel.add(passLabel);
 			JLabel passLabel2 = new JLabel("department's room.");
@@ -396,14 +396,14 @@ public class Login {
 		}
 	}
 
-	public class info extends JFrame { // ì‚¬ìš©ìì˜ ì •ë³´ & ë³€ê²½
+	public class info extends JFrame { // »ç¿ëÀÚÀÇ Á¤º¸ & º¯°æ
 		JButton b1 = new JButton("Modify");
 		JButton b2 = new JButton("Exit");
 		String studentnum, email, name, grade;
-		// ì„œë²„ë¡œë¶€í„° ì •ë³´ë¥¼ ë°›ì•„ì„œ ê°ê°ì— ë„£ì–´ì¤Œ
+		// ¼­¹ö·ÎºÎÅÍ Á¤º¸¸¦ ¹Ş¾Æ¼­ °¢°¢¿¡ ³Ö¾îÁÜ
 
 		public info() {
-			// TODO ìë™ ìƒì„±ëœ ìƒì„±ì ìŠ¤í…
+			// TODO ÀÚµ¿ »ı¼ºµÈ »ı¼ºÀÚ ½ºÅÓ
 
 			setTitle("info");
 			setSize(250, 300);
@@ -472,7 +472,7 @@ public class Login {
 			gratext.setBounds(100, 160, 100, 30);
 			panel.add(gratext);
 
-			// modify ë²„íŠ¼ ëˆŒë €ì„ë•Œ ê°’ ìˆ˜ì •í•´ì£¼ê³  ì„œë²„ì— ë³´ë‚´ì£¼ê¸°
+			// modify ¹öÆ° ´­·¶À»¶§ °ª ¼öÁ¤ÇØÁÖ°í ¼­¹ö¿¡ º¸³»ÁÖ±â
 			b1.setBounds(5, 220, 100, 25);
 			panel.add(b1);
 			b1.addActionListener(new ActionListener() {
@@ -491,8 +491,8 @@ public class Login {
 					grade = mod_grade;
 					gratext.setText(grade);
 					// System.out.println(studentnum + email + name + grade);
-					// ì„œë²„ ì „ë‹¬
-					out.println("Update" + ":" + curid + ":" + email + ":" + grade); // ì„œë²„ë¡œ ì „ë‹¬
+					// ¼­¹ö Àü´Ş
+					out.println("Update" + ":" + curid + ":" + email + ":" + grade); // ¼­¹ö·Î Àü´Ş
 
 				}
 			});
@@ -550,7 +550,7 @@ public class Login {
 				public void actionPerformed(ActionEvent e) {
 					bookTime = text.getText();
 					b1.setEnabled(false);
-					// ì„œë²„ì— bookTime ë³´ë‚´ì£¼ê¸°
+					// ¼­¹ö¿¡ bookTime º¸³»ÁÖ±â
 					out.println("Book " + bookTime + " " + curid);
 					JOptionPane.showMessageDialog(null, "You entered " + bookTime, "Check the reservation",
 							JOptionPane.DEFAULT_OPTION);
@@ -666,20 +666,20 @@ public class Login {
 	public void run() {
 		// TODO Auto-generated method stub
 		try {
-			Socket socket = new Socket(serverAddress, portnum); // ì…ë ¥ë°›ì€ ipì£¼ì†Œì™€ portnumberë¡œ ì†Œì¼“ ìƒì„±.
-			in = new Scanner(socket.getInputStream()); // ì†Œì¼“ì—ì„œ ì½ì–´ì˜¤ëŠ” ë³€ìˆ˜
-			out = new PrintWriter(socket.getOutputStream(), true); // ì†Œì¼“ì— ì“°ëŠ” ë³€ìˆ˜
-			String[] userinfo = null; // ì‚¬ìš©ì ì •ë³´ì €ì¥í•˜ëŠ” ë³€ìˆ˜
+			Socket socket = new Socket(serverAddress, portnum); // ÀÔ·Â¹ŞÀº ipÁÖ¼Ò¿Í portnumber·Î ¼ÒÄÏ »ı¼º.
+			in = new Scanner(socket.getInputStream()); // ¼ÒÄÏ¿¡¼­ ÀĞ¾î¿À´Â º¯¼ö
+			out = new PrintWriter(socket.getOutputStream(), true); // ¼ÒÄÏ¿¡ ¾²´Â º¯¼ö
+			String[] userinfo = null; // »ç¿ëÀÚ Á¤º¸ÀúÀåÇÏ´Â º¯¼ö
 			while (true) {
 				String line = in.nextLine();
 				System.out.println(line);
 				
-				if (line.contains("access")) // ë¡œê·¸ì¸í•œ ì •ë³´ë¥¼ ì„œë²„ê°€ ê²€ì‚¬í•˜ê³ , ìŠ¹ì¸ë«ë‹¤ëŠ” ë©”ì‹œì§€ê°€ ì™”ì„ ê²½ìš°
+				if (line.contains("access")) // ·Î±×ÀÎÇÑ Á¤º¸¸¦ ¼­¹ö°¡ °Ë»çÇÏ°í, ½ÂÀÎµÌ´Ù´Â ¸Ş½ÃÁö°¡ ¿ÔÀ» °æ¿ì
 				{
 					userinfo = line.split(":");
-					JOptionPane.showMessageDialog(null, "ë¡œê·¸ì¸ ì„±ê³µ", "ë¡œê·¸ì¸ í™•ì¸!", JOptionPane.DEFAULT_OPTION);// ì„œë²„ê°€ ë¡œê·¸ì¸
+					JOptionPane.showMessageDialog(null, "·Î±×ÀÎ ¼º°ø", "·Î±×ÀÎ È®ÀÎ!", JOptionPane.DEFAULT_OPTION);// ¼­¹ö°¡ ·Î±×ÀÎ
 					new main();
-					// í‘œì¶œ
+					// Ç¥Ãâ
 					// TODO:
 					curid = userinfo[1];
 					curnumber = Integer.parseInt(userinfo[2]);
@@ -687,36 +687,36 @@ public class Login {
 					curname = userinfo[4];
 					curgrade = Integer.parseInt(userinfo[5]);
 
-					// í˜„ì¬ë¡œê·¸ì¸í•œ ì‚¬ìš©ì ì´ë¦„ì„ ì €ì¥
+					// ÇöÀç·Î±×ÀÎÇÑ »ç¿ëÀÚ ÀÌ¸§À» ÀúÀå
 				}
-				// ì•„ì´ë””ê°€ í‹€ë ¸ì„ ë•Œ
+				// ¾ÆÀÌµğ°¡ Æ²·ÈÀ» ¶§
 				else if (line.contains("id invalid")) {
-					JOptionPane.showMessageDialog(null, "ì•„ì´ë”” í‹€ë¦¼!", "ë¡œê·¸ì¸ í™•ì¸!", JOptionPane.DEFAULT_OPTION); // ë¡œê·¸ì¸ ì‹¤íŒ¨
-																											// ì‹œ,
-																											// ì°½í‘œì¶œ
+					JOptionPane.showMessageDialog(null, "¾ÆÀÌµğ Æ²¸²!", "·Î±×ÀÎ È®ÀÎ!", JOptionPane.DEFAULT_OPTION); // ·Î±×ÀÎ ½ÇÆĞ
+																											// ½Ã,
+																											// Ã¢Ç¥Ãâ
 					return;
 				}			
-				// ë¹„ë°€ë²ˆí˜¸ê°€ í‹€ë ¸ì„ ë•Œ
+				// ºñ¹Ğ¹øÈ£°¡ Æ²·ÈÀ» ¶§
 				else if (line.contains("pw invalid")) {
-					JOptionPane.showMessageDialog(null, "ë¹„ë°€ë²ˆí˜¸ í‹€ë¦¼!", "ë¡œê·¸ì¸ í™•ì¸!", JOptionPane.DEFAULT_OPTION); // ë¡œê·¸ì¸
-																											// ì‹¤íŒ¨ ì‹œ,
-																											// ì°½í‘œì¶œ
+					JOptionPane.showMessageDialog(null, "ºñ¹Ğ¹øÈ£ Æ²¸²!", "·Î±×ÀÎ È®ÀÎ!", JOptionPane.DEFAULT_OPTION); // ·Î±×ÀÎ
+																											// ½ÇÆĞ ½Ã,
+																											// Ã¢Ç¥Ãâ
 					return;
-				} else if (line.contains("Welcome")) // íšŒì›ê°€ì…ì— ì„±ê³µí–ˆì„ ë•Œ
+				} else if (line.contains("Welcome")) // È¸¿ø°¡ÀÔ¿¡ ¼º°øÇßÀ» ¶§
 				{
-					JOptionPane.showMessageDialog(null, "íšŒì›ê°€ì…ì„±ê³µ", "í™˜ì˜í•©ë‹ˆë‹¤!", JOptionPane.DEFAULT_OPTION); // íšŒì›ê°€ì… ì„±ê³µ
-																											// ì‹œ, // ì°½í‘œì¶œ
+					JOptionPane.showMessageDialog(null, "È¸¿ø°¡ÀÔ¼º°ø", "È¯¿µÇÕ´Ï´Ù!", JOptionPane.DEFAULT_OPTION); // È¸¿ø°¡ÀÔ ¼º°ø
+																											// ½Ã, // Ã¢Ç¥Ãâ
 				} else if (line.contains("UC")) {
-					JOptionPane.showMessageDialog(null, "ìˆ˜ì • ì„±ê³µ", "ìˆ˜ì • ì„±ê³µ!", JOptionPane.DEFAULT_OPTION);
+					JOptionPane.showMessageDialog(null, "¼öÁ¤ ¼º°ø", "¼öÁ¤ ¼º°ø!", JOptionPane.DEFAULT_OPTION);
 				} else if (line.contains("UF")) {
-					JOptionPane.showMessageDialog(null, "ìˆ˜ì • ì‹¤íŒ¨", "ìˆ˜ì • ì‹¤íŒ¨!", JOptionPane.DEFAULT_OPTION);
+					JOptionPane.showMessageDialog(null, "¼öÁ¤ ½ÇÆĞ", "¼öÁ¤ ½ÇÆĞ!", JOptionPane.DEFAULT_OPTION);
 				} else if(line.contains("result")) {
 						res=line;
 						count=in.nextInt();
 				}
-				else if(line.contains("Late")) // ì˜ˆì•½ì´ ë§ˆê°ë˜ì—ˆì„ ë•Œ, 
+				else if(line.contains("Late")) // ¿¹¾àÀÌ ¸¶°¨µÇ¾úÀ» ¶§, 
 				{
-					JOptionPane.showMessageDialog(null, "ì˜ˆì•½ ë§ˆê°", "ì˜¤ëŠ˜ ì˜ˆì•½ì€ ë§ˆê°ë˜ì—ˆìŠµë‹ˆë‹¤.", JOptionPane.DEFAULT_OPTION);
+					JOptionPane.showMessageDialog(null, "¿¹¾à ¸¶°¨", "¿À´Ã ¿¹¾àÀº ¸¶°¨µÇ¾ú½À´Ï´Ù.", JOptionPane.DEFAULT_OPTION);
 				}
 				
 
@@ -730,19 +730,19 @@ public class Login {
 	
 
 
-	public static void server(String fileName) // input.txtíŒŒì¼ì—ì„œ ipì£¼ì†Œì™€ port numberë¥¼ ë¶ˆëŸ¬ì˜¤ëŠ” í•¨ìˆ˜.
+	public static void server(String fileName) // input.txtÆÄÀÏ¿¡¼­ ipÁÖ¼Ò¿Í port number¸¦ ºÒ·¯¿À´Â ÇÔ¼ö.
 	{
 		Scanner inputStream = null;
 		try {
-			inputStream = new Scanner(new File(fileName));// inputíŒŒì¼ì„ ì½ì–´ì˜´.
-		} catch (FileNotFoundException e) // íŒŒì¼ì´ ì—†ì„ ê²½ìš°, ìë™ìƒì„±
+			inputStream = new Scanner(new File(fileName));// inputÆÄÀÏÀ» ÀĞ¾î¿È.
+		} catch (FileNotFoundException e) // ÆÄÀÏÀÌ ¾øÀ» °æ¿ì, ÀÚµ¿»ı¼º
 		{
 			ip = "localhost";
 			portnum = 9999;
 			e.printStackTrace();
 		}
 
-		while (inputStream.hasNext()) // inputíŒŒì¼ì—ì„œ, ipì£¼ì†Œì™€ portnumberë¥¼ ì½ì–´ì˜´.
+		while (inputStream.hasNext()) // inputÆÄÀÏ¿¡¼­, ipÁÖ¼Ò¿Í portnumber¸¦ ÀĞ¾î¿È.
 		{
 			ip = inputStream.next();
 			portnum = inputStream.nextInt();
@@ -751,7 +751,7 @@ public class Login {
 
 	public static void main(String args[]) {
 		String fname = "input.txt";
-		server(fname); // inputë‚´ìš©ìœ¼ë¡œ ì •ë³´ ë¶ˆëŸ¬ì˜¤ê¸°
+		server(fname); // input³»¿ëÀ¸·Î Á¤º¸ ºÒ·¯¿À±â
 		Login client = new Login(ip);
 		client.frame.setVisible(true);
 		client.run();
