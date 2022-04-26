@@ -187,6 +187,14 @@ public class Login {
 		JButton resister_btn;
 		JTextArea content;
 
+		JFrame sub = new JFrame("Resister");
+		JLabel lbl, namelbl, gradelbl, emaillbl, idlbl, pwlbl, stnumlbl;
+		JTextField nameField, gradeField, emailField, idField, stnumField;
+		JPasswordField passwd;
+		JPanel namePanel, gradePanel, emailPanel, idPanel, paPanel, stnumPanel;
+		JButton resister_btn;
+		JTextArea content;
+
 		public Resister() {
 
 			sub.setLayout(new FlowLayout());
