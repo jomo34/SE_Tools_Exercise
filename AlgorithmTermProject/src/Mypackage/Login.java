@@ -1,26 +1,32 @@
 package Mypackage;
 
+import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.*;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Calendar;
 import java.util.Scanner;
 import java.util.Set;
-import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.ListSelectionEvent;
@@ -28,733 +34,823 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
-
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import java.net.*;
-
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.Color;
-import java.awt.Font;
-
 public class Login {
-	//
-	static String ip = null; // txtÆÄÀÏ¿¡¼­, ipÀÐ¾î¿È.
-	static int portnum = 0; // port number
-	String serverAddress; // ¼­¹ö ÁÖ¼Ò
-	Scanner in; // ¼ÒÄÏÀ» ¹Þ¾ÆµéÀÏ ¸Å°³Ã¼
-	PrintWriter out; // ¼ÒÄÏÀ¸·Î º¸³¾ ¸Å°ÔÃ¼
-	String curid; // ÇöÀç ·Î±×ÀÎ id
-	static String res="";
-	static int count;
-
-	// login gui variables
-	JFrame frame = new JFrame("login form"); // Ã³À½ ·Î±×ÀÎÃ¢
-	JLabel lbl, la1, la2, la3, emp;
-	JTextField id;
-	JPasswordField passwd;
-	JPanel emptyPanel, idPanel, paPanel, loginPanel;
-	JButton b1, b2;
-	JTextArea content;
-	String curemail;
-	int curnumber;
-	int curgrade;
-	String curname;
-	String logpw;
-	String logid;
-	int buttoncount=0;
-	// TODO:
-
-	// ºñ¹Ð¹øÈ£ ¾ÏÈ£È­ ÄÚµå
-	public String encryptSHA256(String str) {
-		String sha = "";
-		try {
-			MessageDigest sh = MessageDigest.getInstance("SHA-256");
-			sh.update(str.getBytes());
-			byte[] byteData = sh.digest();
-			StringBuilder sb = new StringBuilder();
-			for (byte byteDatum : byteData) {
-				sb.append(Integer.toString((byteDatum & 0xff) + 0x100, 16).substring(1));
-			}
-			sha = sb.toString();
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println("¾ÏÈ£È­ ¿¡·¯-NoSuchAlgorithmException");
-			sha = null;
-		}
-		return sha;
-	}
-
-	// constructor
-	public Login(String serverAddress) {
-		this.serverAddress = serverAddress;
-		// FlowLayout»ç¿ë
-		frame.setLayout(new FlowLayout());
-
-		// Border·Î ¿µ¿ª »ý¼º
-		EtchedBorder eborder = new EtchedBorder();
-		// ·¹ÀÌºí »ý¼º
-		lbl = new JLabel("Enter Id and Password");
-		// ·¹ÀÌºí¿¡ ¿µ¿ª ¸¸µé±â
-		lbl.setBorder(eborder);
-		// ·¹ÀÌºí Ãß°¡
-		frame.add(lbl);
-
-		emptyPanel = new JPanel();
-		emp = new JLabel("\n");
-		emptyPanel.add(emp);
-		frame.add(emp);
-
-		// idÆÐ³Î°ú pw ÆÐ³Î»ý¼º
-		idPanel = new JPanel();
-		paPanel = new JPanel();
-
-		la3 = new JLabel("User ID       ");
-		la2 = new JLabel("Password  ");
-		// idÅØ½ºÆ®ÇÊµå¿Í pwÅØ½ºÆ® ÇÊµå ¼±¾ð
-		id = new JTextField(15);
-		passwd = new JPasswordField(15);
-		idPanel.add(la3);
-		idPanel.add(id);
-		idPanel.setBackground(Color.white);
-		paPanel.add(la2);
-		paPanel.add(passwd);
-		paPanel.setBackground(Color.white);
-
-		// ·Î±×ÀÎ°ú È¸¿ø°¡ÀÔÀ» À§ÇÑ ÆÐ³Î »ý¼º
-
-		loginPanel = new JPanel();
-		loginPanel.setBackground(Color.white);
-		b1 = new JButton("Login");
-		b2 = new JButton("Resister");
-		b1.setBackground(Color.yellow);
-		b2.setBackground(Color.yellow);
-
-		loginPanel.add(emp);
-		loginPanel.add(b1);
-		loginPanel.add(b2);
-		frame.add(idPanel, BorderLayout.WEST);
-		frame.add(paPanel, BorderLayout.WEST);
-		frame.add(loginPanel);
-
-		b1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String comment = e.getActionCommand();
-				if (comment.contentEquals("Login")) // ·Î±×ÀÎ ¹öÆ°À» ´­·¶À» ¶§,
-				{
-
-					logid = id.getText().trim(); // id¿¡ ´©¸¥ °ªÀ» ºÒ·¯¿È
-					logpw = passwd.getText(); // ÆÐ½º¿öµå¿¡ ´©¸¥ °ªÀ» ºÒ·¯¿È.
-					String encryptLogPW = encryptSHA256(logpw); // ¾ÏÈ£È­µÈ ºñ¹Ð¹øÈ£¸¦ ÇØµ¶ÇØ¼­ ¹Þ¾Æ¿È
-					out.println("logid" + logid + " " + encryptLogPW); // ¼­¹ö¿¡°Ô ¾ÆÀÌµð¿Í ÆÐ½º¿öµå Àü´Þ
-					if (logid.length() == 0 || logpw.length() == 0) // id¿Í ºñ¹Ð¹øÈ£¸¦ ¾Æ¹« °Íµµ ÀÔ·ÂÇÏÁö ¾Ê¾ÒÀ» ¶§, ¿¡·¯ ¸Þ½ÃÁö¸¦ Ç¥ÃâÇÔ.
-					{
-						JOptionPane.showMessageDialog(null, "¾ÆÀÌµð ¶Ç´Â ºñ¹Ð¹øÈ£¸¦ ÀÔ·Â ÇÏ¼Å¾ß µË´Ï´Ù.", "¾ÆÀÌµð³ª ºñ¹øÀ» ÀÔ·Â!",
-								JOptionPane.DEFAULT_OPTION);
-						return;
-					}
-					frame.dispose();
-				}
-			}
-		});
-		b2.addActionListener(new ActionListener() { // È¸¿ø°¡ÀÔÀ» ´­·¶À» ¶§, È¸¿ø°¡ÀÔ Ã¢À¸·Î ÀÌµ¿½ÃÄÑÁØ´Ù.
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new Resister();
-			}
-		});
-
-		// 3Çà 20¿­ ¿µ¿ªÀÇ ÅØ½ºÆ®¿¡¾î¸®¾î
-		// content = new JTextArea(3,20);
-		// JScrollPane s= new JScrollPane(content);
-		// add(s);
-		frame.setSize(400, 200);
-		frame.getContentPane().setBackground(Color.white);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-
-	public class Resister { // È¸¿ø°¡ÀÔÀ» ÇÒ ¶§ÀÇ Ã¢
-
-		JFrame sub = new JFrame("Resister");
-		JLabel lbl, namelbl, gradelbl, emaillbl, idlbl, pwlbl, stnumlbl;
-		JTextField nameField, gradeField, emailField, idField, stnumField;
-		JPasswordField passwd;
-		JPanel namePanel, gradePanel, emailPanel, idPanel, paPanel, stnumPanel;
-		JButton resister_btn;
-		JTextArea content;
-
-		public Resister() {
-
-			sub.setLayout(new FlowLayout());
-
-			EtchedBorder eborder = new EtchedBorder();
-
-			lbl = new JLabel("Enter user information");
-			// ·¹ÀÌºí¿¡ ¿µ¿ª ¸¸µé±â
-			lbl.setBorder(eborder);
-			sub.add(lbl);
-
-			idPanel = new JPanel();
-			paPanel = new JPanel();
-			stnumPanel = new JPanel();
-			emailPanel = new JPanel();
-			namePanel = new JPanel();
-			gradePanel = new JPanel();
-
-			idlbl = new JLabel("Userid:          ");
-			idField = new JTextField(10);
-			idPanel.add(idlbl);
-			idPanel.add(idField);
-			idPanel.setBackground(Color.white);
-			sub.add(idPanel);
-
-			pwlbl = new JLabel("Password:         ");
-			passwd = new JPasswordField(10);
-			paPanel.add(pwlbl);
-			paPanel.add(passwd);
-			paPanel.setBackground(Color.white);
-			sub.add(paPanel);
-
-			emaillbl = new JLabel("email:         ");
-			emailField = new JTextField(10);
-			emailPanel.add(emaillbl);
-			emailPanel.add(emailField);
-			emailPanel.setBackground(Color.white);
-			sub.add(emailPanel);
-
-			stnumlbl = new JLabel("Student number: ");
-			stnumField = new JTextField(10);
-			stnumPanel.add(stnumlbl);
-			stnumPanel.add(stnumField);
-			stnumPanel.setBackground(Color.white);
-			sub.add(stnumPanel);
-
-			namelbl = new JLabel("Student name:     ");
-			nameField = new JTextField(10);
-			namePanel.add(namelbl);
-			namePanel.add(nameField);
-			namePanel.setBackground(Color.white);
-			sub.add(namePanel);
-
-			gradelbl = new JLabel("Student grade:    ");
-			gradeField = new JTextField(10);
-			gradePanel.add(gradelbl);
-			gradePanel.add(gradeField);
-			gradePanel.setBackground(Color.white);
-			sub.add(gradePanel);
-
-			resister_btn = new JButton("Resister");
-			resister_btn.setBackground(Color.yellow);
-			sub.add(resister_btn);
-
-			resister_btn.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					String comment = e.getActionCommand();
-					if (comment.contentEquals("Resister")) // register¹öÆ° ÀÔ·Â½Ã,
-					{
-						String name = nameField.getText(); // ÀÌ¸§, »ý³â¿ùÀÏµîÀ» ºÒ·¯¿È
-						String stnum = stnumField.getText();
-						String email = emailField.getText();
-						String id = idField.getText();
-						String pw = passwd.getText();
-						String encryptPW = encryptSHA256(pw);
-						String grade = gradeField.getText();
-						out.println("Resister" + name + " " + stnum + " " + email + " " + id + " " + encryptPW + " "
-								+ grade); // ¼­¹ö¿¡°Ô Àü´Þ.
-					}
-					sub.dispose();
-				}
-			});
-			sub.setSize(250, 350);
-			sub.getContentPane().setBackground(Color.white);
-			sub.setVisible(true);
-			sub.setLocationRelativeTo(null);
-			sub.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		}
-	}
-
-	public class main { // ·Î±×ÀÎ ¼º°ø½Ã ³ª¿À´Â Ã¢
-		JFrame sub = new JFrame("Main");
-		JButton b1 = new JButton("My Info");
-		JButton b2 = new JButton("Book");
-
-		public main() {
-			// TODO ÀÚµ¿ »ý¼ºµÈ »ý¼ºÀÚ ½ºÅÓ
-
-			sub.setTitle("Main");
-			sub.setSize(500, 350);
-			sub.setResizable(false);
-			sub.setLocation(800, 450);
-			sub.setLocationRelativeTo(null);
-			sub.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-			// panel
-			JPanel panel = new JPanel();
-			placeLoginPanel(panel);
-
-			// add
-			sub.add(panel);
-
-			// visible
-			sub.setVisible(true);
-			sub.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		}
-
-		public void placeLoginPanel(JPanel panel) {
-			panel.setLayout(null);
-			JLabel userLabel = new JLabel("Welcome to Gachon Festival!");
-			userLabel.setBounds(90, 10, 500, 25);
-			userLabel.setFont(new Font("Serif", Font.BOLD, 25));
-			panel.add(userLabel);
-
-			JLabel passLabel = new JLabel(
-					"At the 2021 Gachon Festival, AI¡¤software department will hold a special event in");
-			passLabel.setBounds(5, 50, 500, 25);
-			panel.add(passLabel);
-			JLabel passLabel2 = new JLabel("department's room.");
-			passLabel2.setBounds(5, 70, 500, 25);
-			panel.add(passLabel2);
-			JLabel passLabel21 = new JLabel(
-					"You can make a reservation for tomorrow's schedule from 0 o'clock to 18 o'clock.");
-			passLabel21.setBounds(5, 90, 500, 25);
-			panel.add(passLabel21);
-			JLabel passLabel3 = new JLabel(
-					"However, our student council used a slightly unusual algorithm for reservations.");
-			passLabel3.setBounds(5, 110, 500, 25);
-			panel.add(passLabel3);
-			JLabel passLabel31 = new JLabel(
-					"Reservation method is not a first-come, first-served, but based on a greed algorithm.");
-			passLabel31.setBounds(5, 130, 500, 25);
-			panel.add(passLabel31);
-			JLabel passLabel32 = new JLabel(
-					"Reservations will be completed if your reservation isn't overlapped with others.");
-			passLabel32.setBounds(5, 150, 500, 25);
-			panel.add(passLabel32);
-			JLabel passLabel33 = new JLabel("At 18:00, the server will show the reservation table for the next day.");
-	        passLabel33.setBounds(5, 170, 500, 25);
-	        panel.add(passLabel33);
-			JLabel passLabel34 = new JLabel("Good luck, students.");
-			passLabel34.setBounds(5, 190, 500, 25);
-			panel.add(passLabel34);
-
-			JLabel passLabel4 = new JLabel("Click the button");
-			passLabel4.setBounds(10, 230, 120, 25);
-			panel.add(passLabel4);
-			JLabel passLabel5 = new JLabel("to check your info");
-			passLabel5.setBounds(5, 250, 120, 25);
-			panel.add(passLabel5);
-			JLabel passLabel6 = new JLabel("Click the button");
-			passLabel6.setBounds(195, 230, 120, 25);
-			panel.add(passLabel6);
-			JLabel passLabel7 = new JLabel("to book the room");
-			passLabel7.setBounds(190, 250, 120, 25);
-			panel.add(passLabel7);
-			JLabel passLabel8 = new JLabel("Click the button");
-			passLabel8.setBounds(380, 230, 120, 25);
-			panel.add(passLabel8);
-			JLabel passLabel9 = new JLabel("to check schedule");
-			passLabel9.setBounds(375, 250, 120, 25);
-			panel.add(passLabel9);
-
-			JButton b1 = new JButton("My Info");
-			b1.setBounds(5, 280, 100, 25);
-			panel.add(b1);
-			b1.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					new info();
-
-				}
-			});
-
-			JButton b2 = new JButton("Book");
-			b2.setBounds(190, 280, 100, 25);
-			panel.add(b2);
-			b2.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					new Timer();
-				}
-			});
-
-			JButton b3 = new JButton("Time table");
-			b3.setBounds(375, 280, 100, 25);
-			panel.add(b3);
-			b3.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					
-						new Timetable();
-					
-				}
-			});
-		}
-	}
-
-	public class info extends JFrame { // »ç¿ëÀÚÀÇ Á¤º¸ & º¯°æ
-		JButton b1 = new JButton("Modify");
-		JButton b2 = new JButton("Exit");
-		String studentnum, email, name, grade;
-		// ¼­¹ö·ÎºÎÅÍ Á¤º¸¸¦ ¹Þ¾Æ¼­ °¢°¢¿¡ ³Ö¾îÁÜ
-
-		public info() {
-			// TODO ÀÚµ¿ »ý¼ºµÈ »ý¼ºÀÚ ½ºÅÓ
-
-			setTitle("info");
-			setSize(250, 300);
-			setResizable(false);
-			setLocation(800, 450);
-			setLocationRelativeTo(null);
-
-			// panel
-			JPanel panel = new JPanel();
-			placeinfoPanel(panel);
-
-			// add
-			add(panel);
-
-			// visible
-			setVisible(true);
-
-		}
-
-		public void placeinfoPanel(JPanel panel) {
-			panel.setLayout(null);
-			JLabel userLabel = new JLabel("Information about \"" + curid + "\"");
-			userLabel.setBounds(15, 10, 200, 30);
-			panel.add(userLabel);
-
-			JLabel passLabel = new JLabel("User ID");
-			passLabel.setBounds(15, 40, 200, 30);
-			panel.add(passLabel);
-			JTextField idtext = new JTextField(20);
-			idtext.setText(curid);
-			idtext.setEditable(false);
-			idtext.setBounds(100, 40, 100, 30);
-			panel.add(idtext);
-
-			JLabel passLabel2 = new JLabel("Stu_num");
-			passLabel2.setBounds(15, 70, 200, 30);
-			panel.add(passLabel2);
-			JTextField stunum = new JTextField(20);
-			stunum.setText("" + curnumber);
-			stunum.setEditable(false);
-			stunum.setBounds(100, 70, 100, 30);
-			panel.add(stunum);
-
-			JLabel passLabel3 = new JLabel("Email");
-			passLabel3.setBounds(15, 100, 200, 30);
-			panel.add(passLabel3);
-			JTextField emailtext = new JTextField(20);
-			emailtext.setText(curemail);
-			emailtext.setBounds(100, 100, 100, 30);
-			panel.add(emailtext);
-
-			JLabel passLabel4 = new JLabel("Name");
-			passLabel4.setBounds(15, 130, 200, 30);
-			panel.add(passLabel4);
-			JTextField nametext = new JTextField(20);
-			nametext.setText(curname);
-			nametext.setEditable(false);
-			nametext.setBounds(100, 130, 100, 30);
-			panel.add(nametext);
-
-			JLabel passLabel5 = new JLabel("Grade");
-			passLabel5.setBounds(15, 160, 200, 30);
-			panel.add(passLabel5);
-			JTextField gratext = new JTextField(20);
-			gratext.setText("" + curgrade);
-			gratext.setBounds(100, 160, 100, 30);
-			panel.add(gratext);
-
-			// modify ¹öÆ° ´­·¶À»¶§ °ª ¼öÁ¤ÇØÁÖ°í ¼­¹ö¿¡ º¸³»ÁÖ±â
-			b1.setBounds(5, 220, 100, 25);
-			panel.add(b1);
-			b1.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// String mod_num = stunum.getText();
-					// studentnum = mod_num;
-					// stunum.setText(studentnum);
-					String mod_email = emailtext.getText();
-					email = mod_email;
-					emailtext.setText(email);
-					// String mod_name = nametext.getText();
-					// name = mod_name;
-					// nametext.setText(name);
-					String mod_grade = gratext.getText();
-					grade = mod_grade;
-					gratext.setText(grade);
-					// System.out.println(studentnum + email + name + grade);
-					// ¼­¹ö Àü´Þ
-					out.println("Update" + ":" + curid + ":" + email + ":" + grade); // ¼­¹ö·Î Àü´Þ
-
-				}
-			});
-
-			b2.setBounds(130, 220, 100, 25);
-			panel.add(b2);
-			b2.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					dispose();
-				}
-			});
-		}
-	}
-
-	public class Timer extends JFrame implements Runnable {
-
-		JLabel label;
-		JButton b1 = new JButton("Book");
-		JButton b2 = new JButton("Exit");
-		JLabel l1, l2, l3;
-		JTextField text = new JTextField();
-		String bookTime;
-
-		public Timer() {
-			setSize(350, 300);
-			setLocationRelativeTo(null);
-			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			String time = getCurrentTime();
-			getContentPane().setLayout(null);
-			label = new JLabel(time);
-			label.setFont(new Font("TimesRoman", Font.ITALIC, 20));
-			label.setHorizontalAlignment(JLabel.CENTER);
-			label.setBounds(115, 5, 100, 50);
-			add(label);
-
-			l1 = new JLabel("Enter the reservation time");
-			l1.setBounds(20, 50, 300, 20);
-			l2 = new JLabel("Plz enter start time + space + end time");
-			l2.setBounds(20, 80, 300, 20);
-			l3 = new JLabel("Ex) 1320 1400");
-			l3.setBounds(20, 110, 300, 20);
-			add(l1);
-			add(l2);
-			add(l3);
-			text.setBounds(120, 150, 100, 20);
-			add(text);
-
-			JButton b1 = new JButton("Book");
-			b1.setBounds(5, 200, 100, 30);
-			add(b1);
-			b1.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					bookTime = text.getText();
-					b1.setEnabled(false);
-					// ¼­¹ö¿¡ bookTime º¸³»ÁÖ±â
-					out.println("Book " + bookTime + " " + curid);
-					JOptionPane.showMessageDialog(null, "You entered " + bookTime, "Check the reservation",
-							JOptionPane.DEFAULT_OPTION);
-					dispose();
-
-				}
-			});
-			JButton b2 = new JButton("Exit");
-			b2.setBounds(230, 200, 100, 30);
-			add(b2);
-			b2.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					dispose();
-				}
-			});
-			Thread t1 = new Thread(this);
-			t1.start();
-
-			setVisible(true);
-		}
-
-		@Override
-		public void run() {
-			while (true) {
-				try {
-					Thread.sleep(1000);
-					String time = getCurrentTime();
-					label.setText(time);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		public String getCurrentTime() {
-			Calendar c = Calendar.getInstance();
-			int hour = c.get(Calendar.HOUR_OF_DAY);
-			int min = c.get(Calendar.MINUTE);
-			int sec = c.get(Calendar.SECOND);
-
-			String time = hour + ":" + min + ":" + sec;
-			return time;
-		}
-
-	}
-	public class Timetable extends JFrame {
-		String bookperson[] = { "-", "-", "-", "-", "-", "-", "-", "-" };
-		String header[] = { "-", "-", "-", "-", "-", "-", "-", "-" };;
-		String contents[][] = new String[1][8];
-
-		String cont[]=new String[30];
-		
-		public Timetable() {		
-			cont= res.split(" ");
-			
-			for (int i = 0; i < 8; i++) {
-				contents[0][i] = bookperson[i];
-			}
-
-			setTitle("Time table");
-			setSize(600, 110);
-			setLocation(800, 450);
-			setLocationRelativeTo(null);
-
-			// panel
-			JTable table = new JTable(contents, header) {
-				public boolean isCellEditable(int i, int c) {
-					return false;
-				}
-			};
-			for(int i=0; i<8; i++) {
-				 table.getColumnModel().getColumn(i).setPreferredWidth(40);
-			}
-			DefaultTableCellRenderer renderer1 = (DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer();
-			renderer1.setHorizontalAlignment(SwingConstants.CENTER);
-			table.getTableHeader().setDefaultRenderer(renderer1);
-			table.getTableHeader().setReorderingAllowed(false);
-
-			DefaultTableCellRenderer renderer2 = new DefaultTableCellRenderer();
-			renderer2.setHorizontalAlignment(SwingConstants.CENTER);
-			TableColumnModel model = table.getColumnModel();
-			for (int i = 0; i < model.getColumnCount(); i++) {
-				model.getColumn(i).setCellRenderer(renderer2);
-			}
-			for (int i = 0; i < count; i++) {
-				bookperson[i]=cont[2+2*i];
-				header[i]=cont[1+2*i];
-			}
-			for(int i=0; i<count; i++) {
-                table.setValueAt(bookperson[i], 0, i);
-                table.getTableHeader().getColumnModel().getColumn(i).setHeaderValue(header[i]);
-
-   			    table.getTableHeader().repaint();
-     
-             }
-			
-
-			JScrollPane scrollpane = new JScrollPane(table);
-
-			// add
-			add(scrollpane);
-
-			// visible
-			setVisible(true);
-		}
-
-	}
-
-	
-
-	// TODO:
-	public void run() {
-		// TODO Auto-generated method stub
-		try {
-			Socket socket = new Socket(serverAddress, portnum); // ÀÔ·Â¹ÞÀº ipÁÖ¼Ò¿Í portnumber·Î ¼ÒÄÏ »ý¼º.
-			in = new Scanner(socket.getInputStream()); // ¼ÒÄÏ¿¡¼­ ÀÐ¾î¿À´Â º¯¼ö
-			out = new PrintWriter(socket.getOutputStream(), true); // ¼ÒÄÏ¿¡ ¾²´Â º¯¼ö
-			String[] userinfo = null; // »ç¿ëÀÚ Á¤º¸ÀúÀåÇÏ´Â º¯¼ö
-			while (true) {
-				String line = in.nextLine();
-				System.out.println(line);
-				
-				if (line.contains("access")) // ·Î±×ÀÎÇÑ Á¤º¸¸¦ ¼­¹ö°¡ °Ë»çÇÏ°í, ½ÂÀÎµÌ´Ù´Â ¸Þ½ÃÁö°¡ ¿ÔÀ» °æ¿ì
-				{
-					userinfo = line.split(":");
-					JOptionPane.showMessageDialog(null, "·Î±×ÀÎ ¼º°ø", "·Î±×ÀÎ È®ÀÎ!", JOptionPane.DEFAULT_OPTION);// ¼­¹ö°¡ ·Î±×ÀÎ
-					new main();
-					// Ç¥Ãâ
-					// TODO:
-					curid = userinfo[1];
-					curnumber = Integer.parseInt(userinfo[2]);
-					curemail = userinfo[3];
-					curname = userinfo[4];
-					curgrade = Integer.parseInt(userinfo[5]);
-
-					// ÇöÀç·Î±×ÀÎÇÑ »ç¿ëÀÚ ÀÌ¸§À» ÀúÀå
-				}
-				// ¾ÆÀÌµð°¡ Æ²·ÈÀ» ¶§
-				else if (line.contains("id invalid")) {
-					JOptionPane.showMessageDialog(null, "¾ÆÀÌµð Æ²¸²!", "·Î±×ÀÎ È®ÀÎ!", JOptionPane.DEFAULT_OPTION); // ·Î±×ÀÎ ½ÇÆÐ
-																											// ½Ã,
-																											// Ã¢Ç¥Ãâ
-					return;
-				}			
-				// ºñ¹Ð¹øÈ£°¡ Æ²·ÈÀ» ¶§
-				else if (line.contains("pw invalid")) {
-					JOptionPane.showMessageDialog(null, "ºñ¹Ð¹øÈ£ Æ²¸²!", "·Î±×ÀÎ È®ÀÎ!", JOptionPane.DEFAULT_OPTION); // ·Î±×ÀÎ
-																											// ½ÇÆÐ ½Ã,
-																											// Ã¢Ç¥Ãâ
-					return;
-				} else if (line.contains("Welcome")) // È¸¿ø°¡ÀÔ¿¡ ¼º°øÇßÀ» ¶§
-				{
-					JOptionPane.showMessageDialog(null, "È¸¿ø°¡ÀÔ¼º°ø", "È¯¿µÇÕ´Ï´Ù!", JOptionPane.DEFAULT_OPTION); // È¸¿ø°¡ÀÔ ¼º°ø
-																											// ½Ã, // Ã¢Ç¥Ãâ
-				} else if (line.contains("UC")) {
-					JOptionPane.showMessageDialog(null, "¼öÁ¤ ¼º°ø", "¼öÁ¤ ¼º°ø!", JOptionPane.DEFAULT_OPTION);
-				} else if (line.contains("UF")) {
-					JOptionPane.showMessageDialog(null, "¼öÁ¤ ½ÇÆÐ", "¼öÁ¤ ½ÇÆÐ!", JOptionPane.DEFAULT_OPTION);
-				} else if(line.contains("result")) {
-						res=line;
-						count=in.nextInt();
-				}
-				else if(line.contains("Late")) // ¿¹¾àÀÌ ¸¶°¨µÇ¾úÀ» ¶§, 
-				{
-					JOptionPane.showMessageDialog(null, "¿¹¾à ¸¶°¨", "¿À´Ã ¿¹¾àÀº ¸¶°¨µÇ¾ú½À´Ï´Ù.", JOptionPane.DEFAULT_OPTION);
-				}
-				
-
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		} finally {
-			frame.dispose();
-		}
-	}
-	
-
-
-	public static void server(String fileName) // input.txtÆÄÀÏ¿¡¼­ ipÁÖ¼Ò¿Í port number¸¦ ºÒ·¯¿À´Â ÇÔ¼ö.
-	{
-		Scanner inputStream = null;
-		try {
-			inputStream = new Scanner(new File(fileName));// inputÆÄÀÏÀ» ÀÐ¾î¿È.
-		} catch (FileNotFoundException e) // ÆÄÀÏÀÌ ¾øÀ» °æ¿ì, ÀÚµ¿»ý¼º
-		{
-			ip = "localhost";
-			portnum = 9999;
-			e.printStackTrace();
-		}
-
-		while (inputStream.hasNext()) // inputÆÄÀÏ¿¡¼­, ipÁÖ¼Ò¿Í portnumber¸¦ ÀÐ¾î¿È.
-		{
-			ip = inputStream.next();
-			portnum = inputStream.nextInt();
-		}
-	}
-
-	public static void main(String args[]) {
-		String fname = "input.txt";
-		server(fname); // input³»¿ëÀ¸·Î Á¤º¸ ºÒ·¯¿À±â
-		Login client = new Login(ip);
-		client.frame.setVisible(true);
-		client.run();
-
-	}
+
+  //
+  static String ip = null; // txtï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½, ipï¿½Ð¾ï¿½ï¿½.
+  static int portnum = 0; // port number
+  String serverAddress; // ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½
+  Scanner in; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾Æµï¿½ï¿½ï¿½ ï¿½Å°ï¿½Ã¼
+  PrintWriter out; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Å°ï¿½Ã¼
+  String curid; // ï¿½ï¿½ï¿½ï¿½ ï¿½Î±ï¿½ï¿½ï¿½ id
+  static String res = "";
+  static int count;
+
+  // login gui variables
+  JFrame frame = new JFrame("login form"); // Ã³ï¿½ï¿½ ï¿½Î±ï¿½ï¿½ï¿½Ã¢
+  JLabel lbl, la1, la2, la3, emp;
+  JTextField id;
+  JPasswordField passwd;
+  JPanel emptyPanel, idPanel, paPanel, loginPanel;
+  JButton b1, b2;
+  JTextArea content;
+  String curemail;
+  int curnumber;
+  int curgrade;
+  String curname;
+  String logpw;
+  String logid;
+  int buttoncount = 0;
+
+  // TODO:
+
+  // ï¿½ï¿½Ð¹ï¿½È£ ï¿½ï¿½È£È­ ï¿½Úµï¿½
+  public String encryptSHA256(String str) {
+    String sha = "";
+    try {
+      MessageDigest sh = MessageDigest.getInstance("SHA-256");
+      sh.update(str.getBytes());
+      byte[] byteData = sh.digest();
+      StringBuilder sb = new StringBuilder();
+      for (byte byteDatum : byteData) {
+        sb.append(
+          Integer.toString((byteDatum & 0xff) + 0x100, 16).substring(1)
+        );
+      }
+      sha = sb.toString();
+    } catch (NoSuchAlgorithmException e) {
+      System.out.println("ï¿½ï¿½È£È­ ï¿½ï¿½ï¿½ï¿½-NoSuchAlgorithmException");
+      sha = null;
+    }
+    return sha;
+  }
+
+  public String encryptSHA256(String str) {
+    String sha = "";
+    try {
+      MessageDigest sh = MessageDigest.getInstance("SHA-256");
+      sh.update(str.getBytes());
+      byte[] byteData = sh.digest();
+      StringBuilder sb = new StringBuilder();
+      for (byte byteDatum : byteData) {
+        sb.append(
+          Integer.toString((byteDatum & 0xff) + 0x100, 16).substring(1)
+        );
+      }
+      sha = sb.toString();
+    } catch (NoSuchAlgorithmException e) {
+      System.out.println("ï¿½ï¿½È£È­ ï¿½ï¿½ï¿½ï¿½-NoSuchAlgorithmException");
+      sha = null;
+    }
+    return sha;
+  }
+
+  // constructor
+  public Login(String serverAddress) {
+    this.serverAddress = serverAddress;
+    // FlowLayoutï¿½ï¿½ï¿½
+    frame.setLayout(new FlowLayout());
+
+    // Borderï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    EtchedBorder eborder = new EtchedBorder();
+    // ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½
+    lbl = new JLabel("Enter Id and Password");
+    // ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
+    lbl.setBorder(eborder);
+    // ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ß°ï¿½
+    frame.add(lbl);
+
+    emptyPanel = new JPanel();
+    emp = new JLabel("\n");
+    emptyPanel.add(emp);
+    frame.add(emp);
+
+    // idï¿½Ð³Î°ï¿½ pw ï¿½Ð³Î»ï¿½ï¿½ï¿½
+    idPanel = new JPanel();
+    paPanel = new JPanel();
+
+    la3 = new JLabel("User ID       ");
+    la2 = new JLabel("Password  ");
+    // idï¿½Ø½ï¿½Æ®ï¿½Êµï¿½ï¿½ pwï¿½Ø½ï¿½Æ® ï¿½Êµï¿½ ï¿½ï¿½ï¿½ï¿½
+    id = new JTextField(15);
+    passwd = new JPasswordField(15);
+    idPanel.add(la3);
+    idPanel.add(id);
+    idPanel.setBackground(Color.white);
+    paPanel.add(la2);
+    paPanel.add(passwd);
+    paPanel.setBackground(Color.white);
+
+    // ï¿½Î±ï¿½ï¿½Î°ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ ï¿½ï¿½ï¿½ï¿½
+
+    loginPanel = new JPanel();
+    loginPanel.setBackground(Color.white);
+    b1 = new JButton("Login");
+    b2 = new JButton("Resister");
+    b1.setBackground(Color.yellow);
+    b2.setBackground(Color.yellow);
+
+    loginPanel.add(emp);
+    loginPanel.add(b1);
+    loginPanel.add(b2);
+    frame.add(idPanel, BorderLayout.WEST);
+    frame.add(paPanel, BorderLayout.WEST);
+    frame.add(loginPanel);
+
+    b1.addActionListener(
+      new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          String comment = e.getActionCommand();
+          if (
+            comment.contentEquals("Login")
+          ) { // ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½,
+            logid = id.getText().trim(); // idï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½
+            logpw = passwd.getText(); // ï¿½Ð½ï¿½ï¿½ï¿½ï¿½å¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½.
+            String encryptLogPW = encryptSHA256(logpw); // ï¿½ï¿½È£È­ï¿½ï¿½ ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ ï¿½Øµï¿½ï¿½Ø¼ï¿½ ï¿½Þ¾Æ¿ï¿½
+            out.println("logid" + logid + " " + encryptLogPW); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ï¿½ ï¿½Ð½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            if (
+              logid.length() == 0 || logpw.length() == 0
+            ) { // idï¿½ï¿½ ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ ï¿½Æ¹ï¿½ ï¿½Íµï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ï¿½ï¿½.
+              JOptionPane.showMessageDialog(
+                null,
+                "ï¿½ï¿½ï¿½Ìµï¿½ ï¿½Ç´ï¿½ ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½Ï¼Å¾ï¿½ ï¿½Ë´Ï´ï¿½.",
+                "ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½!",
+                JOptionPane.DEFAULT_OPTION
+              );
+              return;
+            }
+            frame.dispose();
+          }
+        }
+      }
+    );
+    b2.addActionListener(
+      new ActionListener() { // È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¢ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø´ï¿½.
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          new Resister();
+        }
+      }
+    );
+
+    // 3ï¿½ï¿½ 20ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Æ®ï¿½ï¿½ï¿½î¸®ï¿½ï¿½
+    // content = new JTextArea(3,20);
+    // JScrollPane s= new JScrollPane(content);
+    // add(s);
+    frame.setSize(400, 200);
+    frame.getContentPane().setBackground(Color.white);
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(false);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+  }
+
+  public class Resister { // È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¢
+
+    JFrame sub = new JFrame("Resister");
+    JLabel lbl, namelbl, gradelbl, emaillbl, idlbl, pwlbl, stnumlbl;
+    JTextField nameField, gradeField, emailField, idField, stnumField;
+    JPasswordField passwd;
+    JPanel namePanel, gradePanel, emailPanel, idPanel, paPanel, stnumPanel;
+    JButton resister_btn;
+    JTextArea content;
+
+    public Resister() {
+      sub.setLayout(new FlowLayout());
+
+      EtchedBorder eborder = new EtchedBorder();
+
+      lbl = new JLabel("Enter user information");
+      // ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
+      lbl.setBorder(eborder);
+      sub.add(lbl);
+
+      idPanel = new JPanel();
+      paPanel = new JPanel();
+      stnumPanel = new JPanel();
+      emailPanel = new JPanel();
+      namePanel = new JPanel();
+      gradePanel = new JPanel();
+
+      idlbl = new JLabel("Userid:          ");
+      idField = new JTextField(10);
+      idPanel.add(idlbl);
+      idPanel.add(idField);
+      idPanel.setBackground(Color.white);
+      sub.add(idPanel);
+
+      pwlbl = new JLabel("Password:         ");
+      passwd = new JPasswordField(10);
+      paPanel.add(pwlbl);
+      paPanel.add(passwd);
+      paPanel.setBackground(Color.white);
+      sub.add(paPanel);
+
+      emaillbl = new JLabel("email:         ");
+      emailField = new JTextField(10);
+      emailPanel.add(emaillbl);
+      emailPanel.add(emailField);
+      emailPanel.setBackground(Color.white);
+      sub.add(emailPanel);
+
+      stnumlbl = new JLabel("Student number: ");
+      stnumField = new JTextField(10);
+      stnumPanel.add(stnumlbl);
+      stnumPanel.add(stnumField);
+      stnumPanel.setBackground(Color.white);
+      sub.add(stnumPanel);
+
+      namelbl = new JLabel("Student name:     ");
+      nameField = new JTextField(10);
+      namePanel.add(namelbl);
+      namePanel.add(nameField);
+      namePanel.setBackground(Color.white);
+      sub.add(namePanel);
+
+      gradelbl = new JLabel("Student grade:    ");
+      gradeField = new JTextField(10);
+      gradePanel.add(gradelbl);
+      gradePanel.add(gradeField);
+      gradePanel.setBackground(Color.white);
+      sub.add(gradePanel);
+
+      resister_btn = new JButton("Resister");
+      resister_btn.setBackground(Color.yellow);
+      sub.add(resister_btn);
+
+      resister_btn.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            String comment = e.getActionCommand();
+            if (
+              comment.contentEquals("Resister")
+            ) { // registerï¿½ï¿½Æ° ï¿½Ô·Â½ï¿½,
+              String name = nameField.getText(); // ï¿½Ì¸ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½
+              String stnum = stnumField.getText();
+              String email = emailField.getText();
+              String id = idField.getText();
+              String pw = passwd.getText();
+              String encryptPW = encryptSHA256(pw);
+              String grade = gradeField.getText();
+              out.println(
+                "Resister" +
+                name +
+                " " +
+                stnum +
+                " " +
+                email +
+                " " +
+                id +
+                " " +
+                encryptPW +
+                " " +
+                grade
+              ); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+            }
+            sub.dispose();
+          }
+        }
+      );
+      sub.setSize(250, 350);
+      sub.getContentPane().setBackground(Color.white);
+      sub.setVisible(true);
+      sub.setLocationRelativeTo(null);
+      sub.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+  }
+
+  public class main { // ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¢
+
+    JFrame sub = new JFrame("Main");
+    JButton b1 = new JButton("My Info");
+    JButton b2 = new JButton("Book");
+
+    public main() {
+      // TODO ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+
+      sub.setTitle("Main");
+      sub.setSize(500, 350);
+      sub.setResizable(false);
+      sub.setLocation(800, 450);
+      sub.setLocationRelativeTo(null);
+      sub.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+      // panel
+      JPanel panel = new JPanel();
+      placeLoginPanel(panel);
+
+      // add
+      sub.add(panel);
+
+      // visible
+      sub.setVisible(true);
+      sub.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public void placeLoginPanel(JPanel panel) {
+      panel.setLayout(null);
+      JLabel userLabel = new JLabel("Welcome to Gachon Festival!");
+      userLabel.setBounds(90, 10, 500, 25);
+      userLabel.setFont(new Font("Serif", Font.BOLD, 25));
+      panel.add(userLabel);
+
+      JLabel passLabel = new JLabel(
+        "At the 2021 Gachon Festival, AIï¿½ï¿½software department will hold a special event in"
+      );
+      passLabel.setBounds(5, 50, 500, 25);
+      panel.add(passLabel);
+      JLabel passLabel2 = new JLabel("department's room.");
+      passLabel2.setBounds(5, 70, 500, 25);
+      panel.add(passLabel2);
+      JLabel passLabel21 = new JLabel(
+        "You can make a reservation for tomorrow's schedule from 0 o'clock to 18 o'clock."
+      );
+      passLabel21.setBounds(5, 90, 500, 25);
+      panel.add(passLabel21);
+      JLabel passLabel3 = new JLabel(
+        "However, our student council used a slightly unusual algorithm for reservations."
+      );
+      passLabel3.setBounds(5, 110, 500, 25);
+      panel.add(passLabel3);
+      JLabel passLabel31 = new JLabel(
+        "Reservation method is not a first-come, first-served, but based on a greed algorithm."
+      );
+      passLabel31.setBounds(5, 130, 500, 25);
+      panel.add(passLabel31);
+      JLabel passLabel32 = new JLabel(
+        "Reservations will be completed if your reservation isn't overlapped with others."
+      );
+      passLabel32.setBounds(5, 150, 500, 25);
+      panel.add(passLabel32);
+      JLabel passLabel33 = new JLabel(
+        "At 18:00, the server will show the reservation table for the next day."
+      );
+      passLabel33.setBounds(5, 170, 500, 25);
+      panel.add(passLabel33);
+      JLabel passLabel34 = new JLabel("Good luck, students.");
+      passLabel34.setBounds(5, 190, 500, 25);
+      panel.add(passLabel34);
+
+      JLabel passLabel4 = new JLabel("Click the button");
+      passLabel4.setBounds(10, 230, 120, 25);
+      panel.add(passLabel4);
+      JLabel passLabel5 = new JLabel("to check your info");
+      passLabel5.setBounds(5, 250, 120, 25);
+      panel.add(passLabel5);
+      JLabel passLabel6 = new JLabel("Click the button");
+      passLabel6.setBounds(195, 230, 120, 25);
+      panel.add(passLabel6);
+      JLabel passLabel7 = new JLabel("to book the room");
+      passLabel7.setBounds(190, 250, 120, 25);
+      panel.add(passLabel7);
+      JLabel passLabel8 = new JLabel("Click the button");
+      passLabel8.setBounds(380, 230, 120, 25);
+      panel.add(passLabel8);
+      JLabel passLabel9 = new JLabel("to check schedule");
+      passLabel9.setBounds(375, 250, 120, 25);
+      panel.add(passLabel9);
+
+      JButton b1 = new JButton("My Info");
+      b1.setBounds(5, 280, 100, 25);
+      panel.add(b1);
+      b1.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            new info();
+          }
+        }
+      );
+
+      JButton b2 = new JButton("Book");
+      b2.setBounds(190, 280, 100, 25);
+      panel.add(b2);
+      b2.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            new Timer();
+          }
+        }
+      );
+
+      JButton b3 = new JButton("Time table");
+      b3.setBounds(375, 280, 100, 25);
+      panel.add(b3);
+      b3.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            new Timetable();
+          }
+        }
+      );
+    }
+  }
+
+  public class info extends JFrame { // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½
+
+    JButton b1 = new JButton("Modify");
+    JButton b2 = new JButton("Exit");
+    String studentnum, email, name, grade;
+
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Îºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾Æ¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½
+
+    public info() {
+      // TODO ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+
+      setTitle("info");
+      setSize(250, 300);
+      setResizable(false);
+      setLocation(800, 450);
+      setLocationRelativeTo(null);
+
+      // panel
+      JPanel panel = new JPanel();
+      placeinfoPanel(panel);
+
+      // add
+      add(panel);
+
+      // visible
+      setVisible(true);
+    }
+
+    public void placeinfoPanel(JPanel panel) {
+      panel.setLayout(null);
+      JLabel userLabel = new JLabel("Information about \"" + curid + "\"");
+      userLabel.setBounds(15, 10, 200, 30);
+      panel.add(userLabel);
+
+      JLabel passLabel = new JLabel("User ID");
+      passLabel.setBounds(15, 40, 200, 30);
+      panel.add(passLabel);
+      JTextField idtext = new JTextField(20);
+      idtext.setText(curid);
+      idtext.setEditable(false);
+      idtext.setBounds(100, 40, 100, 30);
+      panel.add(idtext);
+
+      JLabel passLabel2 = new JLabel("Stu_num");
+      passLabel2.setBounds(15, 70, 200, 30);
+      panel.add(passLabel2);
+      JTextField stunum = new JTextField(20);
+      stunum.setText("" + curnumber);
+      stunum.setEditable(false);
+      stunum.setBounds(100, 70, 100, 30);
+      panel.add(stunum);
+
+      JLabel passLabel3 = new JLabel("Email");
+      passLabel3.setBounds(15, 100, 200, 30);
+      panel.add(passLabel3);
+      JTextField emailtext = new JTextField(20);
+      emailtext.setText(curemail);
+      emailtext.setBounds(100, 100, 100, 30);
+      panel.add(emailtext);
+
+      JLabel passLabel4 = new JLabel("Name");
+      passLabel4.setBounds(15, 130, 200, 30);
+      panel.add(passLabel4);
+      JTextField nametext = new JTextField(20);
+      nametext.setText(curname);
+      nametext.setEditable(false);
+      nametext.setBounds(100, 130, 100, 30);
+      panel.add(nametext);
+
+      JLabel passLabel5 = new JLabel("Grade");
+      passLabel5.setBounds(15, 160, 200, 30);
+      panel.add(passLabel5);
+      JTextField gratext = new JTextField(20);
+      gratext.setText("" + curgrade);
+      gratext.setBounds(100, 160, 100, 30);
+      panel.add(gratext);
+
+      // modify ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
+      b1.setBounds(5, 220, 100, 25);
+      panel.add(b1);
+      b1.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            // String mod_num = stunum.getText();
+            // studentnum = mod_num;
+            // stunum.setText(studentnum);
+            String mod_email = emailtext.getText();
+            email = mod_email;
+            emailtext.setText(email);
+            // String mod_name = nametext.getText();
+            // name = mod_name;
+            // nametext.setText(name);
+            String mod_grade = gratext.getText();
+            grade = mod_grade;
+            gratext.setText(grade);
+            // System.out.println(studentnum + email + name + grade);
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            out.println("Update" + ":" + curid + ":" + email + ":" + grade); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+          }
+        }
+      );
+
+      b2.setBounds(130, 220, 100, 25);
+      panel.add(b2);
+      b2.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            dispose();
+          }
+        }
+      );
+    }
+  }
+
+  public class Timer extends JFrame implements Runnable {
+
+    JLabel label;
+    JButton b1 = new JButton("Book");
+    JButton b2 = new JButton("Exit");
+    JLabel l1, l2, l3;
+    JTextField text = new JTextField();
+    String bookTime;
+
+    public Timer() {
+      setSize(350, 300);
+      setLocationRelativeTo(null);
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+      String time = getCurrentTime();
+      getContentPane().setLayout(null);
+      label = new JLabel(time);
+      label.setFont(new Font("TimesRoman", Font.ITALIC, 20));
+      label.setHorizontalAlignment(JLabel.CENTER);
+      label.setBounds(115, 5, 100, 50);
+      add(label);
+
+      l1 = new JLabel("Enter the reservation time");
+      l1.setBounds(20, 50, 300, 20);
+      l2 = new JLabel("Plz enter start time + space + end time");
+      l2.setBounds(20, 80, 300, 20);
+      l3 = new JLabel("Ex) 1320 1400");
+      l3.setBounds(20, 110, 300, 20);
+      add(l1);
+      add(l2);
+      add(l3);
+      text.setBounds(120, 150, 100, 20);
+      add(text);
+
+      JButton b1 = new JButton("Book");
+      b1.setBounds(5, 200, 100, 30);
+      add(b1);
+      b1.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            bookTime = text.getText();
+            b1.setEnabled(false);
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ bookTime ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
+            out.println("Book " + bookTime + " " + curid);
+            JOptionPane.showMessageDialog(
+              null,
+              "You entered " + bookTime,
+              "Check the reservation",
+              JOptionPane.DEFAULT_OPTION
+            );
+            dispose();
+          }
+        }
+      );
+      JButton b2 = new JButton("Exit");
+      b2.setBounds(230, 200, 100, 30);
+      add(b2);
+      b2.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            dispose();
+          }
+        }
+      );
+      Thread t1 = new Thread(this);
+      t1.start();
+
+      setVisible(true);
+    }
+
+    @Override
+    public void run() {
+      while (true) {
+        try {
+          Thread.sleep(1000);
+          String time = getCurrentTime();
+          label.setText(time);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+
+    public String getCurrentTime() {
+      Calendar c = Calendar.getInstance();
+      int hour = c.get(Calendar.HOUR_OF_DAY);
+      int min = c.get(Calendar.MINUTE);
+      int sec = c.get(Calendar.SECOND);
+
+      String time = hour + ":" + min + ":" + sec;
+      return time;
+    }
+  }
+
+  public class Timetable extends JFrame {
+
+    String bookperson[] = { "-", "-", "-", "-", "-", "-", "-", "-" };
+    String header[] = { "-", "-", "-", "-", "-", "-", "-", "-" };
+    String contents[][] = new String[1][8];
+
+    String cont[] = new String[30];
+
+    public Timetable() {
+      cont = res.split(" ");
+
+      for (int i = 0; i < 8; i++) {
+        contents[0][i] = bookperson[i];
+      }
+
+      setTitle("Time table");
+      setSize(600, 110);
+      setLocation(800, 450);
+      setLocationRelativeTo(null);
+
+      // panel
+      JTable table = new JTable(contents, header) {
+        public boolean isCellEditable(int i, int c) {
+          return false;
+        }
+      };
+      for (int i = 0; i < 8; i++) {
+        table.getColumnModel().getColumn(i).setPreferredWidth(40);
+      }
+      DefaultTableCellRenderer renderer1 = (DefaultTableCellRenderer) table
+        .getTableHeader()
+        .getDefaultRenderer();
+      renderer1.setHorizontalAlignment(SwingConstants.CENTER);
+      table.getTableHeader().setDefaultRenderer(renderer1);
+      table.getTableHeader().setReorderingAllowed(false);
+
+      DefaultTableCellRenderer renderer2 = new DefaultTableCellRenderer();
+      renderer2.setHorizontalAlignment(SwingConstants.CENTER);
+      TableColumnModel model = table.getColumnModel();
+      for (int i = 0; i < model.getColumnCount(); i++) {
+        model.getColumn(i).setCellRenderer(renderer2);
+      }
+      for (int i = 0; i < count; i++) {
+        bookperson[i] = cont[2 + 2 * i];
+        header[i] = cont[1 + 2 * i];
+      }
+      for (int i = 0; i < count; i++) {
+        table.setValueAt(bookperson[i], 0, i);
+        table
+          .getTableHeader()
+          .getColumnModel()
+          .getColumn(i)
+          .setHeaderValue(header[i]);
+
+        table.getTableHeader().repaint();
+      }
+
+      JScrollPane scrollpane = new JScrollPane(table);
+
+      // add
+      add(scrollpane);
+
+      // visible
+      setVisible(true);
+    }
+  }
+
+  // TODO:
+  public void run() {
+    // TODO Auto-generated method stub
+    try {
+      Socket socket = new Socket(serverAddress, portnum); // ï¿½Ô·Â¹ï¿½ï¿½ï¿½ ipï¿½Ö¼Ò¿ï¿½ portnumberï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+      in = new Scanner(socket.getInputStream()); // ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+      out = new PrintWriter(socket.getOutputStream(), true); // ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+      String[] userinfo = null; // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½
+      while (true) {
+        String line = in.nextLine();
+        System.out.println(line);
+
+        if (
+          line.contains("access")
+        ) { // ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½ï¿½Ï°ï¿½, ï¿½ï¿½ï¿½ÎµÌ´Ù´ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+          userinfo = line.split(":");
+          JOptionPane.showMessageDialog(
+            null,
+            "ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½",
+            "ï¿½Î±ï¿½ï¿½ï¿½ È®ï¿½ï¿½!",
+            JOptionPane.DEFAULT_OPTION
+          ); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Î±ï¿½ï¿½ï¿½
+          new main();
+          // Ç¥ï¿½ï¿½
+          // TODO:
+          curid = userinfo[1];
+          curnumber = Integer.parseInt(userinfo[2]);
+          curemail = userinfo[3];
+          curname = userinfo[4];
+          curgrade = Integer.parseInt(userinfo[5]);
+          // ï¿½ï¿½ï¿½ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        }
+        // ï¿½ï¿½ï¿½Ìµï¿½ Æ²ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+        else if (line.contains("id invalid")) {
+          JOptionPane.showMessageDialog(
+            null,
+            "ï¿½ï¿½ï¿½Ìµï¿½ Æ²ï¿½ï¿½!",
+            "ï¿½Î±ï¿½ï¿½ï¿½ È®ï¿½ï¿½!",
+            JOptionPane.DEFAULT_OPTION
+          ); // ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+          // ï¿½ï¿½,
+          // Ã¢Ç¥ï¿½ï¿½
+          return;
+        }
+        // ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ Æ²ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+        else if (line.contains("pw invalid")) {
+          JOptionPane.showMessageDialog(
+            null,
+            "ï¿½ï¿½Ð¹ï¿½È£ Æ²ï¿½ï¿½!",
+            "ï¿½Î±ï¿½ï¿½ï¿½ È®ï¿½ï¿½!",
+            JOptionPane.DEFAULT_OPTION
+          ); // ï¿½Î±ï¿½ï¿½ï¿½
+          // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½,
+          // Ã¢Ç¥ï¿½ï¿½
+          return;
+        } else if (
+          line.contains("Welcome")
+        ) { // È¸ï¿½ï¿½ï¿½ï¿½ï¿½Ô¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+          JOptionPane.showMessageDialog(
+            null,
+            "È¸ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½",
+            "È¯ï¿½ï¿½ï¿½Õ´Ï´ï¿½!",
+            JOptionPane.DEFAULT_OPTION
+          ); // È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+          // ï¿½ï¿½, // Ã¢Ç¥ï¿½ï¿½
+        } else if (line.contains("UC")) {
+          JOptionPane.showMessageDialog(
+            null,
+            "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½",
+            "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½!",
+            JOptionPane.DEFAULT_OPTION
+          );
+        } else if (line.contains("UF")) {
+          JOptionPane.showMessageDialog(
+            null,
+            "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½",
+            "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½!",
+            JOptionPane.DEFAULT_OPTION
+          );
+        } else if (line.contains("result")) {
+          res = line;
+          count = in.nextInt();
+        } else if (
+          line.contains("Late")
+        ) { // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ ï¿½ï¿½,
+          JOptionPane.showMessageDialog(
+            null,
+            "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½",
+            "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.",
+            JOptionPane.DEFAULT_OPTION
+          );
+        }
+      }
+    } catch (Exception e) {
+      System.out.println(e);
+    } finally {
+      frame.dispose();
+    }
+  }
+
+  public static void server(String fileName) { // input.txtï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ ipï¿½Ö¼Ò¿ï¿½ port numberï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½.
+    Scanner inputStream = null;
+    try {
+      inputStream = new Scanner(new File(fileName)); // inputï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ð¾ï¿½ï¿½.
+    } catch (
+      FileNotFoundException e
+    ) { // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½, ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+      ip = "localhost";
+      portnum = 9999;
+      e.printStackTrace();
+    }
+
+    while (
+      inputStream.hasNext()
+    ) { // inputï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½, ipï¿½Ö¼Ò¿ï¿½ portnumberï¿½ï¿½ ï¿½Ð¾ï¿½ï¿½.
+      ip = inputStream.next();
+      portnum = inputStream.nextInt();
+    }
+  }
+
+  public static void main(String args[]) {
+    String fname = "input.txt";
+    server(fname); // inputï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½
+    Login client = new Login(ip);
+    client.frame.setVisible(true);
+    client.run();
+  }
 }
