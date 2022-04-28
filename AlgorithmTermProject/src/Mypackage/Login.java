@@ -824,7 +824,7 @@ public class Login {
     } finally {
       frame.dispose();
     }
-  }
+  }// test commit
 
   public static void server(String fileName) { // input.txt���Ͽ��� ip�ּҿ� port number�� �ҷ����� �Լ�.
     Scanner inputStream = null;
